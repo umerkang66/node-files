@@ -10,9 +10,13 @@ fs.writeFileSync('./txt/output.txt', textOutput);
 // NON-BLOCKING, ASYNCHRONOUS WAY
 fs.readFile('./txt/start.txt', 'utf-8', (err, data1) => {
   if (err) throw new Error(err.message);
-  console.log(data1);
   fs.readFile(`./txt/${data1}.txt`, 'utf-8', (err, data2) => {
     if (err) throw new Error(err.message);
-    console.log(data2);
+    fs.readFile(`./txt/append.txt`, 'utf-8', (err, data3) => {
+      if (err) throw new Error(err.message);
+      const newData = `${data2} ${data3}`;
+
+      fs.writeFile('./txt/final.txt', newData, (err, data) => {});
+    });
   });
 });
