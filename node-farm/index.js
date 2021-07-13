@@ -75,6 +75,7 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, {
       'Content-type': 'application/json',
     });
+
     res.end(dataJson);
 
     // NOT FOUND
@@ -83,6 +84,7 @@ const server = http.createServer((req, res) => {
       'Content-type': 'text/html',
       'my-own-header': 'hello-world',
     });
+
     res.end('<h1>This page could not be found</h1>');
   }
 });
