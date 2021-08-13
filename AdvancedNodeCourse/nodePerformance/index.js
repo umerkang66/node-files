@@ -1,5 +1,6 @@
 const cluster = require('cluster');
 const crypto = require('crypto');
+const express = require('express');
 
 // Is the file being executed in master mode
 if (cluster.isMaster) {
