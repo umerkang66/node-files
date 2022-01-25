@@ -1,0 +1,20 @@
+NodeJs --> Node is a JavaScript runtime based on google v8 engine. Node ties all the libraries together and provides us the abstraction in javascript. We access these libraries in javascript
+
+There are two Libraries in node js:
+1)  v8 engine
+2)  Libuv library
+
+v8 engine: It is written in c++ and javascript
+
+Libuv Library: It is open-source library (written in only c++) with a strong focus on asynchronous i/o. This library gives access to the underlying operating system, file system, networking, and more.
+The Most important features of node js are Event-Loop and Thread-Pool that are implemented by Libuv Library
+
+EventLoop: It is responsible for handling easy-tasks like executing callbacks, and network i/o
+
+ThreadPool: It is responsible for handling heavy-tasks, like file access or compression
+
+There are some other libraries:
+1) http-parser: for parsing http
+2) c-ares: for handling dns request stuff
+3) OpenSSL: for cryptography
+4) zlib: for compression
