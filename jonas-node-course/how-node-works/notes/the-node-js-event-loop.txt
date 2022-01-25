@@ -1,0 +1,42 @@
+All the code that is inside callback functions (non-top-level-code)
+Node uses an Event-Driven architecture
+
+New HTTP request, Timer Expired, and finished file reading will all emit EVENTS, that are caught by event loop, then event-loop will call the callback functions
+
+When we starts up the application, after executing the top level code, the event loop starts right away
+
+Event Loop has multiple phases, and each phase has a CALLBACK QUEUE (that contains callbacks coming from events)
+
+There are 4 phases of event-loop (each one has its own callback queue)
+1)  Expired Timer Callbacks (that has Callback Queue)
+2)  I/O (networking and file access) polling (that has I/O callbacks)
+3)  setImmediateCallbacks 
+4)  Close callbacks
+
+Callbacks in each queue are processed one by one, until there is no one left in the queue only then, the event-loop will enter the next phase
+
+EXPIRED_TIMER_CALLBACKS: If the timers are expired, these are the first Ones that are processed by the event-loop. NOTE IMPORTANT! if the timer expired later, during the time when one of the other phases are being processed, then the callback of that timer will only be called as soon as the event-loop comes back to this first phase
+
+SET_IMMEDIATE_CALLBACKS: This is special kind of timer that we want to use if we want to process callbacks immediately after the I/O polling and execution phase
+
+CLOSE CALLBACKS: In this phase all close events are processed, for example, when a web server of websocket shut down
+
+There are two others CALLBACK QUEUE
+1)  PROCESS.NEXT_TICK() QUEUE
+2)  OTHER MICRO_TASKS QUEUE (handles resolved Promises)
+
+If there are any callbacks in one of these two queues to be processed, they will be executed right after the current phase of the event-loop finishes, instead of waiting for the WHOLE event-loop cycle to finished, it means after any of these 4 main phases callbacks from these 2 phases will be executed
+
+PROCESS.NEXT_TICK(): It is a function that we can use when we really, really need to execute a certain callback right after the current event-loop phase
+
+TICK: It is basically just one cycle in this loop
+
+Now its time to decide whether the loop should continue to the next tick or the program should exit, node js checks if there are any timers, or i/o tasks running in the background, if there aren't any then node will exit the application, and if there are it will got straight to the next tick
+
+Due to event loop asynchronous nature of node js come into possible, As the JavaScript in the node js runs in the single thread, so its our job to NOT BLOCK the single thread by: 
+1)  Don't use the synchronous version of function in the callback, we can use them in the top level code
+2)  Don't perform complex calculations (loop inside loops)
+3)  Be careful with JSON in large objects
+4)  Don't use to complex regular expressions (e.g. nested quantifiers)
+
+We can also manually offload to the thread pool or use child processes
