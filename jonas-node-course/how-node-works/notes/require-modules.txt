@@ -19,3 +19,5 @@ __FILENAME: absolute path of the current module's file
 __DIRNAME: directory name of hte current module
 
 4) Require function return exports of the required module, module.exports is the returned object (important), we can assign variable to the return object from the require function
+
+5) Module is cached after it is first required, if we require that module again, that same module (that was required first) will be returned
