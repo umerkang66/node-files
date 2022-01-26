@@ -1,0 +1,21 @@
+In Node js, each JavaScript files is treated as separated module
+
+1) At first require module is resolved & loading
+2) Then wrapping happens
+3) Then modules are executed
+4) Module exports are returned
+5) The entire module get cached
+
+1) First node fund in the node core modules
+If the module name starts with "." or "../" then node will require in the developer modules
+If the module is not in the node core modules, then it will find it from node_modules, if the module is not found, it will throw an error, and stops the application
+
+2,3) Then module code is wrapped in the special function, which will give us to the special object like exports, require, module, __filename, __dirname, by doing this it keeps the top level variables private in that module
+
+REQUIRE FUNCTION: function to require module
+MODULE: reference to the current module
+EXPORTS: A reference to module.exports used to export object from a module
+__FILENAME: absolute path of the current module's file
+__DIRNAME: directory name of hte current module
+
+4) Require function return exports of the required module, module.exports is the returned object (important), we can assign variable to the return object from the require function
