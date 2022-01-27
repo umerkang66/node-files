@@ -17,9 +17,11 @@ Callbacks in each queue are processed one by one, until there is no one left in 
 
 EXPIRED_TIMER_CALLBACKS: If the timers are expired, these are the first Ones that are processed by the event-loop. NOTE IMPORTANT! if the timer expired later, during the time when one of the other phases are being processed, then the callback of that timer will only be called as soon as the event-loop comes back to this first phase
 
+I/O CALLBACKS: First node js event-loop will check for the I/O related callbacks from previous "defer or pending" callbacks, and execute them. Then it goes to "Poll" phase, where it checks for the new I/O callbacks, and tries its best to execute them, if it can't (it may be too many, or fs task is not done yet) it postpone the callbacks and send it to the pending I/O callbacks, where they can be executed in the next loop. IMPORTANT! it will check for timers before moving to the I/O tasks
+
 SET_IMMEDIATE_CALLBACKS: This is special kind of timer that we want to use if we want to process callbacks immediately after the I/O polling and execution phase
 
-CLOSE CALLBACKS: In this phase all close events are processed, for example, when a web server of websocket shut down
+CLOSE CALLBACKS: In this phase all close events are processed, for example, when a web server or websocket shut down. Now we might exit, if we have no callbacks to handle. Node js keeps track of callbacks "refs", if ref is 0 it node js stops the loop, refs increase by 1 if new callbacks comes, therefore when we are using the web server, the ref always remain 1, so node js doesn't stop execution
 
 There are two others CALLBACK QUEUE
 1)  PROCESS.NEXT_TICK() QUEUE
