@@ -1,9 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 // Routes
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+
+// Utils
+const rootFolderPath = require('./utils/rootFolderPath');
 
 const app = express();
 
@@ -11,6 +15,10 @@ const app = express();
 // This middlewares get data from urls
 // Extended: true means if it should be able to parse non-default features you could say
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// For serving static files we have to use this function, where we have to specify the path of files that contains static files
+// We can also server multiple folders as static
+app.use(express.static(path.join(rootFolderPath, 'public')));
 
 /* DUMMY MIDDLEWARES
 app.use((req, res, next) => {
@@ -28,7 +36,9 @@ app.use(shopRoutes);
 
 // CatchAll middleware to send a 404 page
 app.use((req, res, next) => {
-  res.status(404).send('<h1>Page Not Found</h1>');
+  const pageNotFound = path.join(rootFolderPath, 'views', '404.html');
+
+  res.status(404).sendFile(pageNotFound);
 });
 
 const port = process.env.PORT || 8000;
