@@ -1,20 +1,25 @@
+const { Router } = require('express');
 const path = require('path');
 
-const express = require('express');
+const rootFolderPath = require('../utils/rootFolderPath');
 
-const rootDir = require('../util/path');
+const router = Router();
 
-const router = express.Router();
-
-// /admin/add-product => GET
-router.get('/add-product', (req, res, next) => {
-  res.sendFile(path.join(rootDir, 'views', 'add-product.html'));
+router.get('/add-product', (req, res) => {
+  // We can also get "next" function but didn't need it, don't use next function in routes, because it will result an error
+  res.sendFile(path.join(rootFolderPath, 'views', 'add-product.html'));
 });
 
-// /admin/add-product => POST
-router.post('/add-product', (req, res, next) => {
-  console.log(req.body);
+const products = [];
+
+// router.post is same as router.use but it only filters for post requests
+router.post('/add-product', (req, res) => {
+  const { title } = req.body;
+  if (title) products.push({ title });
+
+  // Redirecting to the root page
   res.redirect('/');
 });
 
-module.exports = router;
+exports.products = products;
+exports.adminRoutes = router;

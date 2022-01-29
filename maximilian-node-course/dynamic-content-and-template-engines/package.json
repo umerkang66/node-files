@@ -1,7 +1,7 @@
 {
   "name": "working-with-express",
   "version": "1.0.0",
-  "description": "This is introduction to express js",
+  "description": "Dynamic content and template engines",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

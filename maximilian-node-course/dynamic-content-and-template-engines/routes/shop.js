@@ -1,13 +1,20 @@
+const { Router } = require('express');
 const path = require('path');
 
-const express = require('express');
+const rootFolderPath = require('../utils/rootFolderPath');
+const { products } = require('./admin');
 
-const rootDir = require('../util/path');
-
-const router = express.Router();
+const router = Router();
 
 router.get('/', (req, res, next) => {
-  res.sendFile(path.join(rootDir, 'views', 'shop.html'));
+  // We can also set our "Content-Type" header, express will not set it itself, if we explicity set it
+  // res.setHeader('Content-Type', 'text/html');
+  // Regular path does not work, because of the different operating systems, we have to use path.join method
+  // __dirname gives us where the path is currently exists
+  res.sendFile(path.join(rootFolderPath, 'views', 'shop.html'));
+
+  console.log(products);
+  // We don't have to use next because it will clash with other response
 });
 
 module.exports = router;
