@@ -1,6 +1,6 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const path = require('path');
+const bodyParser = require('body-parser');
 
 // Routes
 const { adminRoutes } = require('./routes/admin');
@@ -14,8 +14,13 @@ const app = express();
 // Setting global configuration
 // Setting view template "pug", Pug engine comes with built in express support, and auto registers itself with express
 // We can also set the main directory where to find views, but the default is "/views" folder from the root folder
-app.set('view engine', 'pug');
+// app.set('view engine', 'pug');
+
+// Registering the handlebars in express
+// app.engine('hbs', expressHbs());
+// app.set('view engine', 'hbs');
 // This is temporary where to find templates
+app.set('view engine', 'ejs');
 app.set('views', 'views');
 
 // Middlewares
@@ -43,7 +48,7 @@ app.use(shopRoutes);
 
 // CatchAll middleware to send a 404 page
 app.use((req, res, next) => {
-  res.status(404).render('404', { title: 'Page not Found' });
+  res.status(404).render('404', { title: 'Page not Found', path: '/' });
 });
 
 const port = process.env.PORT || 8000;

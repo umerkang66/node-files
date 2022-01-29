@@ -1,7 +1,4 @@
 const { Router } = require('express');
-const path = require('path');
-
-const rootFolderPath = require('../utils/rootFolderPath');
 const { products } = require('./admin');
 
 const router = Router();
@@ -11,7 +8,7 @@ router.get('/', (req, res, next) => {
   // Render method also set the headers like Content-Type automatically
   // We can set the second argument (that is object) and pass them to the pug file
   // Also these views will be generated on the fly
-  res.render('shop', { products, title: 'Shop', path: '/' });
+  res.render('shop', { prods: products, title: 'Shop', path: '/' });
 });
 
 module.exports = router;
