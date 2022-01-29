@@ -11,6 +11,13 @@ const rootFolderPath = require('./utils/rootFolderPath');
 
 const app = express();
 
+// Setting global configuration
+// Setting view template "pug", Pug engine comes with built in express support, and auto registers itself with express
+// We can also set the main directory where to find views, but the default is "/views" folder from the root folder
+app.set('view engine', 'pug');
+// This is temporary where to find templates
+app.set('views', 'views');
+
 // Middlewares
 // This middlewares get data from urls
 // Extended: true means if it should be able to parse non-default features you could say
@@ -36,9 +43,7 @@ app.use(shopRoutes);
 
 // CatchAll middleware to send a 404 page
 app.use((req, res, next) => {
-  const pageNotFound = path.join(rootFolderPath, 'views', '404.html');
-
-  res.status(404).sendFile(pageNotFound);
+  res.status(404).render('404', { title: 'Page not Found' });
 });
 
 const port = process.env.PORT || 8000;

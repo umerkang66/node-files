@@ -6,8 +6,10 @@ const rootFolderPath = require('../utils/rootFolderPath');
 const router = Router();
 
 router.get('/add-product', (req, res) => {
-  // We can also get "next" function but didn't need it, don't use next function in routes, because it will result an error
-  res.sendFile(path.join(rootFolderPath, 'views', 'add-product.html'));
+  res.render('add-product', {
+    title: 'Add product',
+    path: '/admin/add-product',
+  });
 });
 
 const products = [];

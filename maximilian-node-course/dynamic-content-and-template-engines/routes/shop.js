@@ -7,14 +7,11 @@ const { products } = require('./admin');
 const router = Router();
 
 router.get('/', (req, res, next) => {
-  // We can also set our "Content-Type" header, express will not set it itself, if we explicity set it
-  // res.setHeader('Content-Type', 'text/html');
-  // Regular path does not work, because of the different operating systems, we have to use path.join method
-  // __dirname gives us where the path is currently exists
-  res.sendFile(path.join(rootFolderPath, 'views', 'shop.html'));
-
-  console.log(products);
-  // We don't have to use next because it will clash with other response
+  // Render method will automatically find in the views folder because we can set in the main express application, or it is also default, we also don't have to write ".pug" files
+  // Render method also set the headers like Content-Type automatically
+  // We can set the second argument (that is object) and pass them to the pug file
+  // Also these views will be generated on the fly
+  res.render('shop', { products, title: 'Shop', path: '/' });
 });
 
 module.exports = router;
