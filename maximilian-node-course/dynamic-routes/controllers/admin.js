@@ -45,6 +45,21 @@ exports.postEditProduct = (req, res, next) => {
   });
 };
 
+exports.deleteProduct = (req, res, next) => {
+  const { productId } = req.params;
+
+  Product.deleteById(productId, err => {
+    if (err) {
+      return res.status(404).render('404', {
+        pageTitle: 'Cannot Delete file',
+        path: '/',
+      });
+    }
+
+    res.redirect(`/admin/products`);
+  });
+};
+
 exports.postAddProduct = (req, res, next) => {
   const { title, imageUrl, price, description } = req.body;
 

@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
+
 const rootDir = require('../util/path');
+const Cart = require('./cart');
 
 const filePath = path.join(rootDir, 'data', 'products.json');
 
@@ -75,6 +77,33 @@ class Product {
         const foundProduct = products.find(p => p.id === id);
 
         callbackFn(foundProduct);
+      }
+    });
+  }
+
+  static deleteById(id, callbackFn) {
+    getProductsFromFile(products => {
+      if (products instanceof Array) {
+        const productToBeDel = products.find(prod => prod.id === id);
+
+        const productsAfterDel = products.filter(product => product.id !== id);
+
+        fs.writeFile(filePath, JSON.stringify(productsAfterDel), err => {
+          if (err) {
+            // This callback function will redirect to the main page
+            return callbackFn(err.message || 'Something went wrong');
+          }
+
+          // Also remove it from the cart, because it does not have in the cart, if product does not exist anymore
+          Cart.deleteById(id, productToBeDel.price, err => {
+            if (err) {
+              // This callback function will redirect to the main page
+              callbackFn(err);
+            }
+
+            callbackFn();
+          });
+        });
       }
     });
   }

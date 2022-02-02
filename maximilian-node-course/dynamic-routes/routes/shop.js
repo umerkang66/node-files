@@ -12,6 +12,8 @@ router.get('/products/:productId', shopControllers.getProduct);
 router.get('/cart', shopControllers.getCart);
 // This will run when add to cart button hits in the frontend
 router.post('/cart', shopControllers.postCart);
+// Deleting the cart
+router.post('/cart-delete-item', shopControllers.postCartDelete);
 
 router.get('/checkout', shopControllers.getCheckout);
 router.get('/orders', shopControllers.getOrders);
