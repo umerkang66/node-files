@@ -1,0 +1,11 @@
+{
+  "name": "natours-node-rebuild",
+  "version": "1.0.0",
+  "description": "Learning node, express and mongodb",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Umer Kang",
+  "license": "ISC"
+}
