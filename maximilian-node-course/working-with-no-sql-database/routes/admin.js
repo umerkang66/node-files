@@ -1,26 +1,24 @@
+const path = require('path');
+
 const express = require('express');
 
-const adminControllers = require('../controllers/admin');
+const adminController = require('../controllers/admin');
 
 const router = express.Router();
 
 // /admin/add-product => GET
-// This will handle the return of add-product page (that has add-product form)
-router.get('/add-product', adminControllers.getAddProduct);
+router.get('/add-product', adminController.getAddProduct);
 
-// /admin/product => GET
-router.get('/products', adminControllers.getProducts);
+// /admin/products => GET
+router.get('/products', adminController.getProducts);
 
 // /admin/add-product => POST
-// This will handle the post request page of
-router.post('/add-product', adminControllers.postAddProduct);
+router.post('/add-product', adminController.postAddProduct);
 
-// Edit product Page
-router.get('/edit-product/:productId', adminControllers.getEditProduct);
-// Edit Product Post Router
-router.post('/edit-product/:productId', adminControllers.postEditProduct);
+router.get('/edit-product/:productId', adminController.getEditProduct);
 
-// Delete the product
-router.post('/delete-product/:productId', adminControllers.deleteProduct);
+router.post('/edit-product', adminController.postEditProduct);
+
+router.post('/delete-product', adminController.postDeleteProduct);
 
 module.exports = router;

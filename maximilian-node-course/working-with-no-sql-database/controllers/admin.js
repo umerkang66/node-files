@@ -4,87 +4,99 @@ exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
     pageTitle: 'Add Product',
     path: '/admin/add-product',
-    editing: false,
-  });
-};
-
-exports.getEditProduct = (req, res, next) => {
-  // req.query object is created by express if there are any parameters after "?" in the url, that can be distributed by "&"
-  // The extracted values from req.query are strings, so it will be "true" instead of true
-  const { edit } = req.query;
-  // Make sure to return the response
-  if (!edit) return res.redirect('/');
-
-  const { productId } = req.params;
-  Product.findById(productId, product => {
-    if (!product) return res.redirect('/');
-
-    res.render('admin/edit-product', {
-      pageTitle: 'Add Product',
-      path: '/admin/edit-product',
-      editing: edit,
-      product,
-    });
-  });
-};
-
-exports.postEditProduct = (req, res, next) => {
-  const { productId, title, price, imageUrl, description } = req.body;
-
-  const product = new Product(productId, title, imageUrl, description, price);
-
-  product.save(err => {
-    if (err) {
-      return res.status(404).render('404', {
-        pageTitle: 'Cannot Edit file',
-        path: '/',
-      });
-    }
-
-    res.redirect(`/admin/products`);
-  });
-};
-
-exports.deleteProduct = (req, res, next) => {
-  const { productId } = req.params;
-
-  Product.deleteById(productId, err => {
-    if (err) {
-      return res.status(404).render('404', {
-        pageTitle: 'Cannot Delete file',
-        path: '/',
-      });
-    }
-
-    res.redirect(`/admin/products`);
+    editing: false
   });
 };
 
 exports.postAddProduct = (req, res, next) => {
-  const { title, imageUrl, price, description } = req.body;
+  const title = req.body.title;
+  const imageUrl = req.body.imageUrl;
+  const price = req.body.price;
+  const description = req.body.description;
+  req.user
+    .createProduct({
+      title: title,
+      price: price,
+      imageUrl: imageUrl,
+      description: description
+    })
+    .then(result => {
+      // console.log(result);
+      console.log('Created Product');
+      res.redirect('/admin/products');
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
 
-  // We need to pass null as first option because because it is "id", and we don't have "id" when we are creating the new product, "id" only exists when we need to update the product
-  const product = new Product(null, title, imageUrl, description, price);
-
-  // We have to pass the callback function
-  product.save(err => {
-    if (err) {
-      return res.status(404).render('404', {
-        pageTitle: 'Cannot Save file',
-        path: '/',
+exports.getEditProduct = (req, res, next) => {
+  const editMode = req.query.edit;
+  if (!editMode) {
+    return res.redirect('/');
+  }
+  const prodId = req.params.productId;
+  req.user
+    .getProducts({ where: { id: prodId } })
+    // Product.findById(prodId)
+    .then(products => {
+      const product = products[0];
+      if (!product) {
+        return res.redirect('/');
+      }
+      res.render('admin/edit-product', {
+        pageTitle: 'Edit Product',
+        path: '/admin/edit-product',
+        editing: editMode,
+        product: product
       });
-    }
+    })
+    .catch(err => console.log(err));
+};
 
-    res.redirect('/');
-  });
+exports.postEditProduct = (req, res, next) => {
+  const prodId = req.body.productId;
+  const updatedTitle = req.body.title;
+  const updatedPrice = req.body.price;
+  const updatedImageUrl = req.body.imageUrl;
+  const updatedDesc = req.body.description;
+  Product.findById(prodId)
+    .then(product => {
+      product.title = updatedTitle;
+      product.price = updatedPrice;
+      product.description = updatedDesc;
+      product.imageUrl = updatedImageUrl;
+      return product.save();
+    })
+    .then(result => {
+      console.log('UPDATED PRODUCT!');
+      res.redirect('/admin/products');
+    })
+    .catch(err => console.log(err));
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll(products => {
-    res.render('admin/products', {
-      prods: products,
-      pageTitle: 'Admin Products',
-      path: '/admin/products',
-    });
-  });
+  req.user
+    .getProducts()
+    .then(products => {
+      res.render('admin/products', {
+        prods: products,
+        pageTitle: 'Admin Products',
+        path: '/admin/products'
+      });
+    })
+    .catch(err => console.log(err));
+};
+
+exports.postDeleteProduct = (req, res, next) => {
+  const prodId = req.body.productId;
+  Product.findById(prodId)
+    .then(product => {
+      return product.destroy();
+    })
+    .then(result => {
+      console.log('DESTROYED PRODUCT');
+      res.redirect('/admin/products');
+    })
+    .catch(err => console.log(err));
 };

@@ -1,21 +1,25 @@
+const path = require('path');
+
 const express = require('express');
-const shopControllers = require('../controllers/shop');
+
+const shopController = require('../controllers/shop');
 
 const router = express.Router();
 
-router.get('/', shopControllers.getIndex);
-router.get('/products', shopControllers.getProducts);
+router.get('/', shopController.getIndex);
 
-// After adding colon we can add any name of our choice, and if we have a route like "/product/delete", this is not a dynamic route, we have to put delete route above the dynamic route, because order matters
-router.get('/products/:productId', shopControllers.getProduct);
+router.get('/products', shopController.getProducts);
 
-router.get('/cart', shopControllers.getCart);
-// This will run when add to cart button hits in the frontend
-router.post('/cart', shopControllers.postCart);
-// Deleting the cart
-router.post('/cart-delete-item', shopControllers.postCartDelete);
+router.get('/products/:productId', shopController.getProduct);
 
-router.get('/checkout', shopControllers.getCheckout);
-router.get('/orders', shopControllers.getOrders);
+router.get('/cart', shopController.getCart);
+
+router.post('/cart', shopController.postCart);
+
+router.post('/cart-delete-item', shopController.postCartDeleteProduct);
+
+router.post('/create-order', shopController.postOrder);
+
+router.get('/orders', shopController.getOrders);
 
 module.exports = router;
