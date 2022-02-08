@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
+
 const rootDir = require('../util/path');
+const Tour = require('../models/tourModel');
 
 const filePath = path.join(rootDir, 'dev-data', 'data', 'tours-simple.json');
 const tours = JSON.parse(fs.readFileSync(filePath));
@@ -67,8 +69,8 @@ exports.getTour = (req, res) => {
 };
 
 exports.createTour = (req, res) => {
-  // req.body is !undefined because we  have used a express.json() middleware
-  const body = req.body;
+  // req.body is !undefined because we have used a express.json() middleware
+  const { body } = req;
   const newId = tours[tours.length - 1].id + 1;
 
   const newTour = { id: newId, ...body };
