@@ -3,8 +3,34 @@ const Tour = require('../models/tourModel');
 // ROUTE HANDLERS
 exports.getAllTours = async (req, res) => {
   try {
+    // Creating the shallow copy of req.query because all of the query parameters are not for filtering
+    const queryObj = { ...req.query };
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+
+    // Exclude excluded these fields from queryObj
+    excludedFields.forEach(el => delete queryObj[el]);
+
+    // Advance Filtering
+    // when url /api/v1/tours?duration[gte]=5, if duration is "greater than or equal than" then This will come out of url { duration: { gte: '5' } }
+    let queryStr = JSON.stringify(queryObj);
+    // Replacing all the operators (gte, gt, lte, lt) with mongodb operators ($gte, $gt, $lte, $lt) (add $ sign before operators)
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+
     // If there are not tours, find method will return an empty array
-    const tours = await Tour.find();
+    // Mongodb way of filtering
+    // BUILD QUERY
+    // Without awaiting Tour.find send us query object where we can chain other methods
+    const query = Tour.find(JSON.parse(queryStr));
+
+    /* // Mongoose way of filtering
+    const query = Tour.find()
+      .where('duration')
+      .equals(5)
+      .where('difficulty')
+      .equals('easy'); */
+
+    // EXECUTE QUERY
+    const tours = await query;
 
     // By using this json method, we already set the Content-Type header to 'application/json'
     res.status(200).json({
