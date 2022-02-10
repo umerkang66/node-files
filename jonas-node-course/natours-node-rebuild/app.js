@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
-const rootDir = require('./util/path');
+const rootDir = require('./utils/path');
 
 // Importing the routes
 const tourRouter = require('./routes/tourRoutes');
