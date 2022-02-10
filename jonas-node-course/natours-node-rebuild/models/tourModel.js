@@ -63,6 +63,8 @@ const tourSchema = new mongoose.Schema({
     type: Date,
     // Date.now() will the give us the time in milliseconds
     default: Date.now(),
+    // By selecting false, this will be automatically removed from the response result
+    select: false,
   },
   // different dates when tour starts, tour of same type can start on different times in a year
   startDates: [Date],

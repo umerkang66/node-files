@@ -20,7 +20,35 @@ exports.getAllTours = async (req, res) => {
     // Mongodb way of filtering
     // BUILD QUERY
     // Without awaiting Tour.find send us query object where we can chain other methods
-    const query = Tour.find(JSON.parse(queryStr));
+    let query = Tour.find(JSON.parse(queryStr));
+
+    // Sorting
+    // req comes as api/v1/tours?sort=price,ratingsAverage, if price is same then it will sort on the basis of ratingsAverage because that is the second field
+    if (req.query.sort) {
+      // here req.query.sort = price
+      // If we set -price here mongoose will automatically sort it in the other order
+      // If there are multiple values mongoose will expect a space between them, but there is a comma in the url
+      const sortBy = req.query.sort.replaceAll(',', ' ');
+
+      query = query.sort(sortBy);
+    } else {
+      // If user doesn't specify the sort field, we can still sort it by createdAt (in the descending order) so the newest ones will appear first
+      query = query.sort('-createdAt');
+    }
+
+    // Limiting
+    // The Url looks like this /api/v1/tours?fields=name,duration,difficulty,price
+    // This means in the response only send name, duration, difficulty, price fields
+    if (req.query.fields) {
+      // Mongoose expects strings separated by spaces
+      const fields = req.query.fields.replaceAll(',', ' ');
+
+      // query select method limits the field, this is also called projecting
+      query = query.select(fields);
+    } else {
+      // In case user doesn't specify the field the default is to remove "__v"
+      query = query.select('-__v');
+    }
 
     /* // Mongoose way of filtering
     const query = Tour.find()
