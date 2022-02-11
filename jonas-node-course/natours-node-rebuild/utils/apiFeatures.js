@@ -1,15 +1,15 @@
 class APIFeatures {
-  constructor(query, queryString) {
+  constructor(query, requestQuery) {
     // "query" is just the Model.find() before awaiting
     this.query = query;
-    // "queryString" is actually req.query
-    this.queryString = queryString;
+    // "requestQuery" is actually req.query
+    this.requestQuery = requestQuery;
   }
 
   filter() {
     // FILTERING
     // Creating the shallow copy of req.query because all of the query parameters are not for filtering
-    const queryObj = { ...this.queryString };
+    const queryObj = { ...this.requestQuery };
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
 
     // Exclude excluded these fields from queryObj
@@ -34,11 +34,11 @@ class APIFeatures {
   sort() {
     // SORTING
     // req comes as api/v1/tours?sort=price,ratingsAverage, if price is same then it will sort on the basis of ratingsAverage because that is the second field
-    if (this.queryString.sort) {
+    if (this.requestQuery.sort) {
       // here req.query.sort = price
       // If we set -price here mongoose will automatically sort it in the other order
       // If there are multiple values mongoose will expect a space between them, but there is a comma in the url
-      const sortBy = this.queryString.sort.replaceAll(',', ' ');
+      const sortBy = this.requestQuery.sort.replaceAll(',', ' ');
 
       this.query = this.query.sort(sortBy);
     } else {
@@ -53,9 +53,9 @@ class APIFeatures {
     // LIMITING
     // The Url looks like this /api/v1/tours?fields=name,duration,difficulty,price
     // This means in the response only send name, duration, difficulty, price fields
-    if (this.queryString.fields) {
+    if (this.requestQuery.fields) {
       // Mongoose expects strings separated by spaces
-      const fields = this.queryString.fields.replaceAll(',', ' ');
+      const fields = this.requestQuery.fields.replaceAll(',', ' ');
 
       // query select method limits the field, this is also called projecting
       this.query = this.query.select(fields);
@@ -76,9 +76,9 @@ class APIFeatures {
     // There are two methods .skip() and .limit(), skip() means how many documents to skip before start querying, limit() means how many pages to show per page
 
     // If we don't have page initialize it with 1
-    const page = +this.queryString.page || 1;
+    const page = +this.requestQuery.page || 1;
     // If we don't specify limit initialize it with 20
-    const limit = +this.queryString.limit || 20;
+    const limit = +this.requestQuery.limit || 20;
 
     // We don't ask for skip value from user, but we calculate it
     const skipCollections = limit * (page - 1);

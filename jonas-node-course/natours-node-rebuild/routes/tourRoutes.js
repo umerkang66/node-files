@@ -10,6 +10,10 @@ router
   .route('/top-5-cheap')
   .get(tourController.aliasTopTours, tourController.getAllTours);
 
+router.route('/tour-stats').get(tourController.getTourStats);
+// We should also be able to pass year through url params ("/:year")
+router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
+
 router
   .route('/')
   .get(tourController.getAllTours)
