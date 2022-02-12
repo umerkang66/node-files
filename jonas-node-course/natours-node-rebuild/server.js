@@ -17,6 +17,8 @@ const DB = process.env.DATABASE.replace(
   process.env.DATABASE_PASSWORD
 );
 
+// const DB_LOCAL = process.env.DATABASE_LOCAL;
+
 mongoose.connect(DB).then(() => console.log('Db connection successful'));
 
 // START THE SERVER
