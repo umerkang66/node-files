@@ -11,7 +11,7 @@ console.log(app.get('env'));
 console.log(process.env.NODE_ENV); */
 
 // CONNECTING TO THE DB
-// Creating the db connection string
+// Creating the db (mongodb-atlas) connection string
 const DB = process.env.DATABASE.replace(
   '<PASSWORD>',
   process.env.DATABASE_PASSWORD

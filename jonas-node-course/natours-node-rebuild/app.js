@@ -1,12 +1,19 @@
 const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
+
+// Importing the utils
+const AppError = require('./utils/appError');
 const rootDir = require('./utils/path');
 
 // Importing the routes
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
+// Importing the Controllers
+const globalErrorHandler = require('./controllers/errorController');
+
+// Creating the application
 const app = express();
 
 // MIDDLEWARES: These are the functions that can modify the request objects. Middlewares that exists firsts in the code, will be executed first
@@ -35,5 +42,21 @@ app.use((req, res, next) => {
 // We can also specify the routes in the use function, then callback functions will be applied to specifically to that request url
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+
+// ERROR HANDLING
+// Unhandled Routes
+// If router reach this part of the app.js file, it means neither of the above router have catch it, so this route doesn't exist
+// "*" stands for everything
+app.all('*', (req, res, next) => {
+  // Create an error, then call next, that will be automatically be caught by Error Handling Middleware
+  const errMessage = `Can't find ${req.originalUrl} on this server!`;
+  const err = new AppError(errMessage, 404);
+
+  // If "next" function will anything, express will assume that it is an error, then it will skip the other middlewares, and send it directly to the global error handling middleware
+  next(err);
+});
+
+// Global Error Handling Middleware
+app.use(globalErrorHandler);
 
 module.exports = app;
