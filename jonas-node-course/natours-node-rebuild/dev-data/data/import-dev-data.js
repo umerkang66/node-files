@@ -1,7 +1,10 @@
 const dotenv = require('dotenv');
 const fs = require('fs');
 const mongoose = require('mongoose');
+
+// Importing the Models
 const Tour = require('../../models/tourModel');
+const User = require('../../models/userModel');
 
 // Tell where the config file is located, and get the config file before requiring the app.js file
 dotenv.config({ path: `${__dirname}/../../config.env` });
@@ -48,10 +51,24 @@ const deleteData = async () => {
   process.exit();
 };
 
+const deleteUser = async () => {
+  try {
+    // Tour.create can also accept the array of objects
+    // This is going to delete the all the documents in the db.tours
+    await User.deleteMany({});
+    console.log('Users successfully Deleted!');
+  } catch (err) {
+    console.log(err);
+  }
+  process.exit();
+};
+
 // Interacting with the command line
 // process.argv is an array where 3rd element is actually what we specified in the terminal after node process
 if (process.argv[2] === '--import') {
   importData();
 } else if (process.argv[2] === '--delete') {
   deleteData();
+} else if (process.argv[2] === '--delete-users') {
+  deleteUser();
 }
