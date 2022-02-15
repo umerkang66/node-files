@@ -42,6 +42,9 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
   // EXECUTE QUERY
   const tours = await features.query;
 
+  // ERROR HANDLING IN GET_ALL_TOURS
+  // If no tours found, there is no need to send an error response, (just send an empty array), if there is some mongoose (DB) error then Promise will automatically rejected by mongoose, that error will be caught by catchAsync to globalErrorHandlingMiddleware
+
   // SENDING RESPONSE
   // By using this json method, we already set the Content-Type header to 'application/json'
   res.status(200).json({
@@ -99,6 +102,15 @@ exports.updateTour = catchAsync(async (req, res, next) => {
     runValidators: true,
   });
 
+  // If there is not tour, it is null
+  if (!tour) {
+    // EXPLANATION OF THIS "IF" BLOCK IS IN GET_TOUR FUNCTION
+    // throw new AppError('Tour with this id is not found', 404);
+
+    // Make sure to return it
+    return next(new AppError('Tour with this id is not found', 404));
+  }
+
   res.status(200).json({
     status: 'success',
     data: { tour },
@@ -109,7 +121,17 @@ exports.deleteTour = catchAsync(async (req, res, next) => {
   // This "id" is a string
   const { id } = req.params;
   // Deleting the tour
-  await Tour.findByIdAndDelete(id);
+  // It will return the tour that is deleted (as the resolved value of promise)
+  const tour = await Tour.findByIdAndDelete(id);
+
+  // If there is not tour, it is null
+  if (!tour) {
+    // EXPLANATION OF THIS "IF" BLOCK IS IN GET_TOUR FUNCTION
+    // throw new AppError('Tour with this id is not found', 404);
+
+    // Make sure to return it
+    return next(new AppError('Tour with this id is not found', 404));
+  }
 
   // Deleting response is "204" which means "no content"
   res.status(204).json({

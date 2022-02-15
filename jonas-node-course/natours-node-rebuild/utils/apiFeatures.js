@@ -24,10 +24,10 @@ class APIFeatures {
     // If there are not tours, find method will return an empty array
     // Mongodb way of filtering
     // BUILD QUERY
-    // Without awaiting Tour.find send us query object where we can chain other methods
+    // Without awaiting Tour.find() send us query object where we can chain other query methods
     this.query = this.query.find(JSON.parse(queryStr));
 
-    // Return this so we can chain these methods
+    // Return this so we can chain these class methods
     return this;
   }
 
