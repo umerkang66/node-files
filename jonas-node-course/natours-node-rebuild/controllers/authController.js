@@ -134,7 +134,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 // If user is logged, further if we want to restrict the routes to the certain types of logged in users
 exports.restrictTo = (...roles) => {
   // Roles is an array and it can be "admin", "controller" or "user"
-  return catchAsync(async (req, res, next) => {
+  return (req, res, next) => {
     // If the current user's (req.user: added by restrict middleware) role is not in the roles (that should be allowed) array, then return an error
     // Getting the currentUser's role
     const userRole = req.user.role;
@@ -150,5 +150,5 @@ exports.restrictTo = (...roles) => {
 
     // Grant access to the next route handler
     next();
-  });
+  };
 };
