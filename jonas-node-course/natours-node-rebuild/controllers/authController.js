@@ -29,17 +29,10 @@ const signToken = userId => {
 // We are not calling is createUser but signup, because that one has appropriate meaning in the context of authentication
 exports.signup = catchAsync(async (req, res, next) => {
   // Get user properties from req.body
-  const { name, email, password, passwordConfirm, passwordChangedAt } =
-    req.body;
+  const { name, email, password, passwordConfirm } = req.body;
 
   // Create new user
-  const newUser = await User.create({
-    name,
-    email,
-    password,
-    passwordConfirm,
-    passwordChangedAt,
-  });
+  const newUser = await User.create({ name, email, password, passwordConfirm });
   // If user creation failed, mongoose will automatically reject the promise, thus error will be caught in the catchAsync()
 
   // After signing up, log in the user
@@ -49,7 +42,8 @@ exports.signup = catchAsync(async (req, res, next) => {
   // "201" means created
   res.status(201).json({
     status: 'success',
-    data: { user: newUser, token },
+    token,
+    data: { user: newUser },
   });
 });
 
@@ -82,7 +76,10 @@ exports.login = catchAsync(async (req, res, next) => {
   const token = signToken(user._id);
 
   // 4) Send the response
-  res.status(200).json({ status: 'success', token });
+  res.status(200).json({
+    status: 'success',
+    token,
+  });
 });
 
 // This is going to be a middleware function, that will before some other route handler (then that handler will become protected)
@@ -112,17 +109,46 @@ exports.protect = catchAsync(async (req, res, next) => {
   // If the user is deleted by user himself or admin, then this token should not work, but currently it will work (so we have to change it)
 
   // We have encoded the userId as "id" in the jwt
-  const freshUser = await User.findById(decoded.id);
+  const currentUser = await User.findById(decoded.id);
 
-  if (!freshUser) {
+  if (!currentUser) {
     return next(
       new AppError('The user belonging to this token does no longer exist', 401)
     );
   }
 
   // 4) Check if user changed password after the token was issued
-  // If user has changed his password, and someone has steel his previous password or token then after changing the password that previous token should not work, we are going to implement it on the instance method
-  freshUser.changedPasswordAfter(decoded.iat);
+  // This will return true, if the user changed their password
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    // If user has changed his password, and someone has steel his previous password or token then after changing the password that previous token should not work, we are going to implement it on the instance method
+    return next(
+      new AppError('User recently changed password. Please log in again', 401)
+    );
+  }
 
+  // Grant access to the next protected route handler, and put the entire user data on the req.user
+  req.user = currentUser;
   next();
 });
+
+// If user is logged, further if we want to restrict the routes to the certain types of logged in users
+exports.restrictTo = (...roles) => {
+  // Roles is an array and it can be "admin", "controller" or "user"
+  return catchAsync(async (req, res, next) => {
+    // If the current user's (req.user: added by restrict middleware) role is not in the roles (that should be allowed) array, then return an error
+    // Getting the currentUser's role
+    const userRole = req.user.role;
+
+    if (!roles.includes(userRole)) {
+      return next(
+        new AppError(
+          "You don't have the permission to perform this action",
+          401
+        )
+      );
+    }
+
+    // Grant access to the next route handler
+    next();
+  });
+};

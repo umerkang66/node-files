@@ -19,6 +19,15 @@ const userSchema = new mongoose.Schema({
   },
   // Photo is not required
   photo: String,
+  role: {
+    type: String,
+    enum: {
+      values: ['user', 'guide', 'lead-guide', 'admin'],
+      message: 'Role only can be "user", "guide", "lead-guide", "admin"',
+    },
+    // By default the role is user
+    default: 'user',
+  },
   password: {
     type: String,
     required: [true, 'Please provide a password'],
@@ -81,9 +90,14 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   // If this property doesn't exist it means that the user have never changed its password, (it will be undefined or null)
   if (this.passwordChangedAt) {
     // Convert the passwordChangedAt to milliseconds, and JWTTimestamp is in seconds, so convert the changedTimestamp to seconds also by dividing it by 1000
-    const changedTimestamp = this.passwordChangedAt.getTime() / 1000;
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
 
-    console.log(changedTimestamp, JWTTimestamp);
+    // True means changed
+    // If password change time is greater than jwtTimestamp means password is changed after the jwt is created, hence return true
+    return changedTimestamp >= JWTTimestamp;
   }
 
   // If the password is not changed after the token was issued

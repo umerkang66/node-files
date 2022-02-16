@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const validator = require('validator');
+// const validator = require('validator');
 
 // We can specify the fields of a document, validate them, and also specify some error message
 const tourSchema = new mongoose.Schema(
