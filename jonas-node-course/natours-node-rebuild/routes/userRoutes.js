@@ -8,6 +8,7 @@ const router = Router();
 
 // Auth Controllers: For Users
 router.post('/signup', authController.signup);
+router.post('/login', authController.login);
 
 // User Controllers: For Administrators
 router

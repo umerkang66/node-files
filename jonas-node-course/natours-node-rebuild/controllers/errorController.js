@@ -34,6 +34,17 @@ const handleValidationErrorsDB = err => {
   return new AppError(errStr, 400);
 };
 
+// HANDLING JWT ERRORS
+const handleJWTError = () => {
+  // "401" means unauthorize
+  return new AppError('Invalid token. Please log in again', 401);
+};
+
+const handleTokenExpiredError = () => {
+  // "401" means unauthorize
+  return new AppError('Token has expired. Please log in again', 401);
+};
+
 // SENDING ERRORS IN DEVELOPMENT AND PRODUCTION
 const sendErrorDev = (err, res) => {
   // In the development send as much information as possible
@@ -111,6 +122,19 @@ const errorController = (err, req, res, next) => {
     if (error.name === 'ValidationError') {
       // Mongoose validation errors will be handled here
       error = handleValidationErrorsDB(error);
+    }
+
+    // JWT ERRORS
+    if (error.name === 'JsonWebTokenError') {
+      // Handling the jwt errors, like if jwt is not correct or manipulated
+      // Don't need to pass the error, cause we don't need it
+      error = handleJWTError();
+    }
+
+    if (error.name === 'TokenExpiredError') {
+      // If token is expired after certain, then request comes in, jwt will throw an error with this name
+      // Don't need to pass the error, cause we don't need it
+      error = handleTokenExpiredError();
     }
 
     sendErrorProd(error, res);
