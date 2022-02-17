@@ -1,5 +1,6 @@
 // BEFORE IMPLEMENTING AUTHENTICATION: It is a real responsibility to get the authentication right. Because user's data is at stake, and the company who runs the application is at stake as well
 
+const crypto = require('crypto');
 const { promisify } = require('util');
 // Importing the packages
 const jwt = require('jsonwebtoken');
@@ -11,6 +12,7 @@ const User = require('../models/userModel');
 // Explanation of catchAsync is in the tourController and catchAsync file
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const sendEmail = require('../utils/email');
 
 // AUTH CONTROLLER UTILS
 const jwtVerifyPromisified = promisify(jwt.verify);
@@ -152,3 +154,108 @@ exports.restrictTo = (...roles) => {
     next();
   };
 };
+
+// Implementing the forgot password, and rest password functionality, first the user will send request to the forgotPassword, then from there the reset password, route will be called
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    // Explanation in upper route handlers
+    return next(new AppError('Please provide an email address', 401));
+  }
+
+  // 1) Get user based on POST email
+  const user = await User.findOne({ email });
+  if (!user) {
+    // Explanation in upper route handlers
+    return next(new AppError('There is no user with this email address', 404));
+  }
+
+  // 2) Generate the random reset token (from user instance method)
+  const resetToken = user.createPasswordResetToken();
+  // IMP! Make sure to save it because, we modify the document values in the createPasswordResetToken() function that will not be saved in the DB (they will just be saved in the memory in this point), unless we save them
+
+  // If we currently save the document, without options, that will give an error, because we didn't specify the other required fields like (email, password), so set the validateBeforeSave to false
+  await user.save({ validateBeforeSave: false });
+
+  // 3) Send it to the user's email
+  // "req.protocol" may be "http" or "https"
+  // "host" can be localhost or the production url itself
+  const resetUrl = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/users/resetPassword/${resetToken}`;
+
+  const message = `Forgot your password? Submit a PATCH request with your new password, and passwordConfirm to: ${resetUrl}\nIf you didn't forget the password, simply please ignore this email`;
+
+  // Here we need to do more than just catchErrors so create an tryCatch block
+  try {
+    await sendEmail({
+      // Send the email to the user email or req.body.email both are same
+      email: user.email,
+      subject: 'Your password reset token (valid for 10 minutes only)',
+      message,
+    });
+
+    // We should not sent it to the response (because here everyone could get it, so send it to the email)
+    res.status(200).json({
+      status: 'success',
+      message: 'Token sent to email',
+    });
+  } catch (err) {
+    // If there is an error
+    // Remove the password reset token, and reset expires property from the DB
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+
+    await user.save({ validateBeforeSave: false });
+
+    // Send an error to the response
+    // Error code is "500" means server error
+    return next(
+      new AppError('There was an error sending the email. Try again later', 500)
+    );
+  }
+});
+
+// This will run after the user has received the token from forgotPassword, then it will receive that token as req.parameter as the new password, and the new passwordConfirm from the body
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  // This token is the non-encrypted one, we have to first encrypt it then compare it to the token that is in the DB
+  const { token } = req.params;
+  const { password, passwordConfirm } = req.body;
+
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  // 1) Get user based of the token
+  const user = await User.findOne({
+    token: hashedToken,
+    // Date.now() is an timestamp but behind the scenes mongodb will convert them to the same
+    // If the token is greater than Date.now() means it is not expired yet, (it will expire it in the future), If it is less than Date.now() (means token is expired and there will be no user)
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  // This will handle both !user, and token date less than Date.now()
+  if (!user) {
+    return next(new AppError('Token is invalid or has expired.', 400));
+  }
+
+  // 2) If token has not expired and there is a user, then reset the password
+  user.password = password;
+  // Password confirm will not be saved in the DB, this is just for validation purposes
+  user.passwordConfirm = passwordConfirm;
+  // Delete the password reset token, and password reset expired
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+
+  // Don't use findByIdAndUpdate if we have to run the validators
+  // This will also run the validators, and the save middleware functions (where passwords are encrypted)
+  await user.save();
+
+  // 3) IMP! Update the changedPasswordAt property for the current user, This is automatically changed from the userModel pre save hook
+
+  // 4) Log the user in, send the jwt to the client
+  const signInToken = signToken(user._id);
+
+  res.status(200).json({
+    status: 'success',
+    token: signInToken,
+  });
+});

@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
@@ -48,6 +49,9 @@ const userSchema = new mongoose.Schema({
   },
   // This property will only be truthy when, someone will change its password (when the user is created it will be undefined or null)
   passwordChangedAt: Date,
+  // Store the token in DB
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 // MONGOOSE MIDDLEWARES: Explanations are in TourModel file
@@ -72,6 +76,20 @@ userSchema.pre('save', async function (next) {
 
   // Make sure to call next
   next();
+});
+
+// This will run when we will reset the password in authController
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) {
+    // If password is not modified then call the next middleware
+    // Or if the document is new, then isModified will be true, but we don't want to set the passwordChangedAt Property, so also call next()
+    return next();
+  }
+
+  // If password is modified, then set the passwordChangedAt property, before saving (we don't need to call save, because this is a save middleware, this will run before saving actually)
+
+  // IMPORTANT PROBLEM! Sometimes saving it to the DB is slow than issuing jwt to the client, so passwordChangedAt will become after the jwt is created and sent, then user will not be able to get access to the protected route, using the token (he has to log in again), so subtract it with 1 seconds
+  this.passwordChangedAt = Date.now() - 1000;
 });
 
 // INSTANCE METHODS: These methods will be available on instance of User Model (user)
@@ -102,6 +120,26 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 
   // If the password is not changed after the token was issued
   return false;
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+  // This token doesn't need to be that strong as the password hash (not use bcrypt, use node crypto module)
+
+  // randomBytes will return Buffer, convert it to string, this will create a token
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  // but we also need to hash the created token
+  // We have to store this hashed token in the DB, because when user will send token we have to compare it with this one
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  // Password will expire after the 10 minutes of creation of token
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  // Return the !hashed token token, which is then send to the client through email, because that is the one that client will send to the resetPassword route handler, to reset its password, and in the resetPassword route, we can compare the received token (convert it to the hashed token itself) with hashed token in the DB,
+  return resetToken;
 };
 
 // Creating the modelClass out of schema
