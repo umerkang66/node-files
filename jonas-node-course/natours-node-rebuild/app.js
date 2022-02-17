@@ -2,6 +2,11 @@ const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+// http parameter pollution
+const hpp = require('hpp');
 
 // Importing the utils
 const AppError = require('./utils/appError');
@@ -18,8 +23,41 @@ const globalErrorHandler = require('./controllers/errorController');
 const app = express();
 
 // MIDDLEWARES: These are the functions that can modify the request objects. Middlewares that exists firsts in the code, will be executed first
+
+// Set Security HTTP headers
+app.use(helmet());
+
 // By using the express.json() data from the request body (that comes in streams) collected and stored the req.body object
-app.use(express.json());
+app.use(
+  express.json({
+    // We can limit the data coming into the req object
+    limit: '10kb',
+  })
+);
+
+// After reading the data from express.json() then sanitize it
+// Data sanitization against NoSQL query injection
+// This will filter out all of the $ signs and dots ".", because that's how mongodb operators are written
+app.use(mongoSanitize());
+
+// Data sanitization against XSS attacks
+// This will clean any malicious input from html code, mongoose validation also protects us (because it also doesn't allow any other data into our DB excepts that is specify in the schema)
+app.use(xss());
+
+// If the user send two same parameter fields, then express will convert it to the array, but our application cannot is prepare for fields array (it is prepare for field string), so this package will remove it
+app.use(
+  hpp({
+    // Allow some of the fields to be existed twice
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ],
+  })
+);
 
 if (process.env.NODE_ENV === 'development') {
   // Only use morgan if we are in development mode
