@@ -28,6 +28,17 @@ const signToken = userId => {
   return token;
 };
 
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+
+  // "201" means created
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    // data: { user },
+  });
+};
+
 // We are not calling is createUser but signup, because that one has appropriate meaning in the context of authentication
 exports.signup = catchAsync(async (req, res, next) => {
   // Get user properties from req.body
@@ -39,14 +50,9 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   // After signing up, log in the user
   // Usually when we signup for any web application, we also get automatically logged in (just log in no need to check for the password is correct or something like that)
-  const token = signToken(newUser._id);
 
   // "201" means created
-  res.status(201).json({
-    status: 'success',
-    token,
-    data: { user: newUser },
-  });
+  createSendToken(newUser, 201, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -75,13 +81,8 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // 3) If everything ok, send token to the client
-  const token = signToken(user._id);
-
-  // 4) Send the response
-  res.status(200).json({
-    status: 'success',
-    token,
-  });
+  // "200" means "ok"
+  createSendToken(user, 200, res);
 });
 
 // This is going to be a middleware function, that will before some other route handler (then that handler will become protected)
@@ -252,10 +253,35 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   // 3) IMP! Update the changedPasswordAt property for the current user, This is automatically changed from the userModel pre save hook
 
   // 4) Log the user in, send the jwt to the client
-  const signInToken = signToken(user._id);
+  createSendToken(user, 200, res);
+});
 
-  res.status(200).json({
-    status: 'success',
-    token: signInToken,
-  });
+// This will work if the logged in user want to update his password,
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  // 1) Get the passwordCurrent, newPassword, newPasswordConfirm form the req.body
+  const { passwordCurrent, password, passwordConfirm } = req.body;
+
+  // 2) Get the user from request, that is added by "protect"
+  // protect middleware will run before this route, this req.user property has the user that is trying to update his password
+  const { user } = req;
+
+  // 3) Check if the current password is equal to the user's password that is saved in the DB
+  // user.password is undefined so first get the user password from the DB
+  const foundUser = await User.findById(user._id).select('+password');
+
+  if (!(await user.correctPassword(passwordCurrent, foundUser.password))) {
+    return next(new AppError('Current Password is not correct', 401));
+  }
+
+  // 4) If the password is correct, then update the password in the DB
+  user.password = password;
+  user.passwordConfirm = passwordConfirm;
+
+  // 5) After updating the password, passwordChangedAt property will automatically change from the user model pre save hook
+
+  // Run the validators, and all the save hooks before saving to the DB
+  await user.save();
+
+  // 6) Send the success message, and again signIn the user (send the token)
+  createSendToken(user, 200, res);
 });
