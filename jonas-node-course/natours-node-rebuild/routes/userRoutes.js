@@ -25,6 +25,8 @@ router.patch(
 // USER CONTROLLERS
 // This is also a protected route, and the id of the user is going to come from req.user that is set by protect middleware
 router.patch('/updateMe', authController.protect, userController.updateMe);
+// This one also requires user to be logged in
+router.delete('/deleteMe', authController.protect, userController.deleteMe);
 
 // For Administrators
 router

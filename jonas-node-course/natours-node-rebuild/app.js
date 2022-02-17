@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 
 // Importing the utils
 const AppError = require('./utils/appError');
@@ -25,6 +26,18 @@ if (process.env.NODE_ENV === 'development') {
   // Morgan is a logging middleware (that logs about requests)
   app.use(morgan('dev'));
 }
+
+// Limit the request that this server will receive from a certain ip address
+const limiter = rateLimit({
+  // This will allow 100 request from same ip in 1 hour (1 hour is specified below as windowMx)
+  max: 100,
+  // 1 Hour in milliseconds
+  windowMx: 60 * 60 * 1000,
+  message: 'Too many requests from this ip, please try again in an hour',
+});
+
+// Apply this limiter on to /api
+app.use('/api', limiter);
 
 // Serving static files
 const staticFilesPath = path.join(rootDir, 'public');

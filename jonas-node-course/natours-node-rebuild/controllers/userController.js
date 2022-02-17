@@ -58,6 +58,17 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   });
 });
 
+// Logged in user can delete them by setting the active flag to false in the DB
+exports.deleteMe = catchAsync(async (req, res, next) => {
+  await User.findByIdAndUpdate(req.user._id, { active: false });
+
+  // "204" means deleted
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
 exports.getUser = (req, res) => {
   res.send('getting user');
 };

@@ -52,6 +52,11 @@ const userSchema = new mongoose.Schema({
   // Store the token in DB
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 // MONGOOSE MIDDLEWARES: Explanations are in TourModel file
@@ -90,6 +95,16 @@ userSchema.pre('save', function (next) {
 
   // IMPORTANT PROBLEM! Sometimes saving it to the DB is slow than issuing jwt to the client, so passwordChangedAt will become after the jwt is created and sent, then user will not be able to get access to the protected route, using the token (he has to log in again), so subtract it with 1 seconds
   this.passwordChangedAt = Date.now() - 1000;
+
+  // Make sure to call next
+  next();
+});
+
+// Query Middleware
+userSchema.pre(/^find/, function (next) {
+  // "this" points to the current query, and we can chain further methods on query
+  // The users that are deleted (active: false) should be shown in the find query result
+  this.find({ active: { $ne: false } });
 
   // Make sure to call next
   next();

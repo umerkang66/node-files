@@ -31,11 +31,33 @@ const signToken = userId => {
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
 
+  // Attach the cookie to the cookie (a cookie is a piece of text, that server send to the browser, then browser automatically attach this cookie to every request that browser made to that certain server)
+  // JWT_COOKIE_EXPIRES_IN: This is in days, convert it into milliseconds
+  const cookieOptions = {
+    // When the cookie should expires (this should be the same the jwt expires date in config.env file)
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    // By using this cookie cannot be modified by any way by browser
+    httpOnly: true,
+  };
+
+  if (process.env.NODE_ENV === 'production') {
+    // By using this cookie will be only sent if we are using https
+    // This one should only be done in production
+    cookieOptions.secure = true;
+  }
+
+  res.cookie('jwt', token, cookieOptions);
+
+  // Delete the password from user data
+  user.password = undefined;
+
   // "201" means created
   res.status(statusCode).json({
     status: 'success',
     token,
-    // data: { user },
+    data: { user },
   });
 };
 
