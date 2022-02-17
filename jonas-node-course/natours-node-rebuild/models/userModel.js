@@ -90,6 +90,9 @@ userSchema.pre('save', function (next) {
 
   // IMPORTANT PROBLEM! Sometimes saving it to the DB is slow than issuing jwt to the client, so passwordChangedAt will become after the jwt is created and sent, then user will not be able to get access to the protected route, using the token (he has to log in again), so subtract it with 1 seconds
   this.passwordChangedAt = Date.now() - 1000;
+
+  // Make sure to call next
+  next();
 });
 
 // INSTANCE METHODS: These methods will be available on instance of User Model (user)
