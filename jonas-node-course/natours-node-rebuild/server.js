@@ -13,7 +13,7 @@ process.on('uncaughtException', error => {
 
 // Tell where the config file is located, and get the config file before requiring the app.js file
 dotenv.config({ path: './config.env' });
-const app = require('./app');
+const app = require('./src/app');
 
 /* This env variable is set by express
 console.log(app.get('env'));

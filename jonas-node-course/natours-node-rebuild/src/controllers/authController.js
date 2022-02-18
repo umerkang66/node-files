@@ -28,6 +28,7 @@ const signToken = userId => {
   return token;
 };
 
+// We also need to send statusCode with it, because different token creating operations can have different statusCode
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
 
