@@ -3,8 +3,8 @@ const fs = require('fs');
 const mongoose = require('mongoose');
 
 // Importing the Models
-const Tour = require('../../models/tourModel');
-const User = require('../../models/userModel');
+const Tour = require('../../src/models/tourModel');
+const User = require('../../src/models/userModel');
 
 // Tell where the config file is located, and get the config file before requiring the app.js file
 dotenv.config({ path: `${__dirname}/../../config.env` });
@@ -21,9 +21,7 @@ const DB = process.env.DATABASE.replace(
 mongoose.connect(DB).then(() => console.log('Db connection successful'));
 
 // Read Json file
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8')
-);
+const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
 
 // Import Data into DB
 const importData = async () => {

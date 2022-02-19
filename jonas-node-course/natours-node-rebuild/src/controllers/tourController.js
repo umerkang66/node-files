@@ -59,6 +59,7 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 exports.getTour = catchAsync(async (req, res, next) => {
   // This "id" is string
   const { id } = req.params;
+  // Populate the users (guides) from the user model
   const tour = await Tour.findById(id);
 
   // If there is not tour, it is null
@@ -184,12 +185,12 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
     },
 
     /* 
-        // we can also repeat stages
-        {
-          // this will remove the 'EASY' group from response result
-          $match: { _id: { $ne: 'EASY' } },
-        },
-      */
+      // we can also repeat stages
+      {
+        // this will remove the 'EASY' group from response result
+        $match: { _id: { $ne: 'EASY' } },
+      },
+    */
   ]);
 
   // Sending response

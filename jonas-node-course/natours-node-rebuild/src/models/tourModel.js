@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const slugify = require('slugify');
 // const validator = require('validator');
 
+// IMPORTING THE MODELS
+// Only required if the users should be embedded
+// const User = require('./userModel');
+
 // We can specify the fields of a document, validate them, and also specify some error message
 const tourSchema = new mongoose.Schema(
   {
@@ -108,7 +112,51 @@ const tourSchema = new mongoose.Schema(
     secretTour: {
       type: Boolean,
       default: false,
+      select: false,
     },
+    // Mongodb has good support for getSpatial Data, (data that describe places on earth using longitude and latitude: we can point simple points or we can also points more complex geometries, like lines, or polygons)
+    startLocation: {
+      // This is getJSON
+      // This is not schema Types options, but this is an embedded documents, in order for this object to recognized as the getJSON object, we need the "type" and the "coordinates" property
+      type: {
+        // These are type schema types options
+        type: String,
+        default: 'Point', // others can be lines, polygons
+        enum: ['Point'], // Not other than "Point"
+      },
+      coordinates: {
+        // These are the coordinates schema types options
+        // The first number is longitude, and the second one is latitude, (opposite the real world)
+        type: [Number],
+      },
+      // These two are not required for geoJSON
+      address: String,
+      description: String,
+    },
+    // In order to create documents, and to embed them into this document, we need to create an array, and specify that document in that, It is also called EMBEDDING
+    locations: [
+      {
+        // This type is because geoJSON excepts type, and coordinate
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    guides: [
+      // This should like embedded documents
+      {
+        // type should be mongodbId,
+        type: mongoose.Schema.ObjectId,
+        // ref should from which model they will be imported
+        ref: 'users',
+      },
+    ],
   },
   {
     // When converting it to json, make sure to add Virtual Properties
@@ -144,7 +192,19 @@ tourSchema.pre('save', function (next) {
   next();
 });
 
-/* tourSchema.pre('save', function (next) {
+// EMBEDDING THE USERS (GUIDES) IN TOUR MODEL
+/* tourSchema.pre('save', async function (next) {
+  // The guidesPromise will actually array of promises
+  const guidesPromise = this.guides.map(async guideId => {
+    return await User.findById(guideId);
+  });
+
+  this.guides = await Promise.all(guidesPromise);
+
+  next();
+});
+
+tourSchema.pre('save', function (next) {
   console.log('From tourSchema second pre save middleware 😀😀😀');
   next();
 });
@@ -169,6 +229,24 @@ tourSchema.pre(/^find/, function (next) {
   next();
 });
 
+// WE CAN POPULATE ALSO IN THE MODEL AND THE IN CONTROLLER, BUT WE WILL USE THE POPULATING IN THE CONTROLLER
+tourSchema.pre(/^find/, function (next) {
+  // here "this" is current find query (with awaiting)
+  // Here we can also specify just the path to be populate (populate('guides')), but we are passing object
+  this.populate({
+    // "path" is the name of the field in current schema,
+    path: 'guides',
+    // "model" is the name of the schema from where we are importing
+    // "model" is not required if we are not populating further nested documents, hence we are just using it because it makes the code clean
+    model: 'users',
+    select: '-__v -passwordChangedAt',
+
+    // HOW IT WORKS: populate method will collect the ids from the "path" property, and search for that ids in the "model" (that is users), then populate it in this current find query
+  });
+
+  next();
+});
+
 // Post middleware
 tourSchema.post(/^find/, function (docs, next) {
   // Docs are all the documents that are returned from the query
@@ -188,6 +266,6 @@ tourSchema.pre('aggregate', function (next) {
 });
 
 // Creating the model(collection: Tours) out of schema
-const Tour = mongoose.model('Tours', tourSchema);
+const Tour = mongoose.model('tours', tourSchema);
 
 module.exports = Tour;

@@ -17,6 +17,7 @@ const filterReqBody = (reqObj, ...allowedFields) => {
   return newObj;
 };
 
+//  USER ROUTE HANDLERS
 exports.getAllUsers = catchAsync(async (req, res) => {
   // Explanation in tour controller file
   const users = await User.find();
