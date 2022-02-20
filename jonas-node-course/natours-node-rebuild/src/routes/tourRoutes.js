@@ -2,7 +2,15 @@ const { Router } = require('express');
 const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
 
+// Importing the review router to merge the routers
+const reviewRouter = require('./reviewRoutes');
+
 const router = Router();
+
+// REVIEWS: MERGING ROUTES
+// Router should use review router, if it gets the routes like this "/api/v1/tours/:tourId/reviews"
+// This is just mounting the router
+router.use('/:tourId/reviews', reviewRouter);
 
 // Params middlewares: that only runs if the certain criteria is mentioned that if it has "id" in the parameter
 // router.param('id', tourController.checkId);

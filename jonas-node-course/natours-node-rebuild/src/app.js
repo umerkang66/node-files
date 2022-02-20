@@ -94,6 +94,7 @@ app.use((req, res, next) => {
 // We can also specify the routes in the use function, then callback functions will be applied to specifically to that request url
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+// We can use reviewRouter directly from here, but it can also be accessed from the tourRouter
 app.use('/api/v1/reviews', reviewRouter);
 
 // ERROR HANDLING

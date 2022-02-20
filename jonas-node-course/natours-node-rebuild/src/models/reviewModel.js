@@ -37,6 +37,31 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
+// QUERY MIDDLEWARES
+// POPULATING THE USER, AND TOUR IN THE REVIEW
+reviewSchema.pre(/^find/, function (next) {
+  // Explanations are in the tourModel
+  // Here "this" is current query
+  /* this.populate({
+    path: 'user',
+    model: 'users',
+    select: 'name photo',
+  }).populate({
+    path: 'tour',
+    model: 'tours',
+    select: 'name',
+  }); */
+
+  // We don't need it here, because we are already virtually populating the reviews in the tour
+  this.populate({
+    path: 'user',
+    model: 'users',
+    select: 'name photo',
+  });
+
+  next();
+});
+
 const Review = mongoose.model('reviews', reviewSchema);
 
 module.exports = Review;

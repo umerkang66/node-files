@@ -29,10 +29,8 @@ router.patch('/updateMe', authController.protect, userController.updateMe);
 router.delete('/deleteMe', authController.protect, userController.deleteMe);
 
 // For Administrators
-router
-  .route('/')
-  .get(userController.getAllUsers)
-  .post(userController.createUser);
+router.route('/').get(userController.getAllUsers);
+// we don't need to create the user here, because we have sign up for that
 
 router
   .route('/:id')

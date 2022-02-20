@@ -1,5 +1,7 @@
 // Importing Models
 const Tour = require('../models/tourModel');
+// Importing the HandleFactory
+const factory = require('./handleFactory');
 
 // Importing Utils
 const APIFeatures = require('../utils/apiFeatures');
@@ -81,65 +83,9 @@ exports.getTour = catchAsync(async (req, res, next) => {
 });
 
 // The function that should be exported from controller, should be a function (not the returned value from function call)
-exports.createTour = catchAsync(async (req, res, next) => {
-  // req.body is !undefined because we have used a express.json() middleware
-  const newTour = await Tour.create(req.body);
-
-  // "201" means created
-  res.status(201).json({
-    status: 'success',
-    data: { newTour },
-  });
-});
-
-exports.updateTour = catchAsync(async (req, res, next) => {
-  const { body } = req;
-  const { id } = req.params;
-
-  const tour = await Tour.findByIdAndUpdate(id, body, {
-    // By using this, new updated document will be returned
-    new: true,
-    // It means run validator every time the tour is updated
-    runValidators: true,
-  });
-
-  // If there is not tour, it is null
-  if (!tour) {
-    // EXPLANATION OF THIS "IF" BLOCK IS IN GET_TOUR FUNCTION
-    // throw new AppError('Tour with this id is not found', 404);
-
-    // Make sure to return it
-    return next(new AppError('Tour with this id is not found', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: { tour },
-  });
-});
-
-exports.deleteTour = catchAsync(async (req, res, next) => {
-  // This "id" is a string
-  const { id } = req.params;
-  // Deleting the tour
-  // It will return the tour that is deleted (as the resolved value of promise)
-  const tour = await Tour.findByIdAndDelete(id);
-
-  // If there is not tour, it is null
-  if (!tour) {
-    // EXPLANATION OF THIS "IF" BLOCK IS IN GET_TOUR FUNCTION
-    // throw new AppError('Tour with this id is not found', 404);
-
-    // Make sure to return it
-    return next(new AppError('Tour with this id is not found', 404));
-  }
-
-  // Deleting response is "204" which means "no content"
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
-});
+exports.createTour = factory.createOne(Tour);
+exports.updateTour = factory.updateOne(Tour);
+exports.deleteTour = factory.deleteOne(Tour);
 
 exports.getTourStats = catchAsync(async (req, res, next) => {
   // Using aggregation pipeline (this is a mongodb feature)

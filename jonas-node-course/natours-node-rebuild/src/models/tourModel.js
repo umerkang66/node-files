@@ -175,6 +175,19 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// VIRTUAL POPULATE
+// Populating the reviews in the tours, but we don't want to save the ids of the reviews in the tour document, so we have to populate it but virtually,
+// If we are doing parent referencing, but also want to get the data in the parent itself
+// We have set this field, but we don't yet populated it, but we need to populate it, and we have populated in the query middleware
+tourSchema.virtual('reviews', {
+  // Reference to the reviews model that will be populated, on the fly without the saving the ids on the DB
+  ref: 'reviews',
+  // Name of the field in the other model (Review model) that contains the id
+  foreignField: 'tour',
+  // Where that id is stored in the current document
+  localField: '_id',
+});
+
 // MONGOOSE MIDDLEWARES
 // There are 4 types of mongoose middlewares, document, query, aggregate, and model middlewares, we can have multiple pre, and post middlewares
 // 1) Document Middlewares
@@ -243,6 +256,13 @@ tourSchema.pre(/^find/, function (next) {
 
     // HOW IT WORKS: populate method will collect the ids from the "path" property, and search for that ids in the "model" (that is users), then populate it in this current find query
   });
+
+  next();
+});
+
+tourSchema.pre('findOne', function (next) {
+  // Here "this" is current query
+  this.populate('reviews');
 
   next();
 });
