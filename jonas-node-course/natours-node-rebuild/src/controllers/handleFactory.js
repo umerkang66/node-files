@@ -30,6 +30,9 @@ exports.getAll = Model => {
     // EXECUTE QUERY
     const docs = await features.query;
 
+    // EXPLAIN THE QUERY
+    // const docs = await features.query.explain();
+
     // ERROR HANDLING IN GET_ALL_DOCUMENTS
     // If no DOC found, there is no need to send an error response, (just send an empty array), if there is some mongoose (DB) error then Promise will automatically rejected by mongoose, that error will be caught by catchAsync to globalErrorHandlingMiddleware
 

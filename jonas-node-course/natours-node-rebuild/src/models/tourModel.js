@@ -52,7 +52,6 @@ const tourSchema = new mongoose.Schema(
     ratingsAverage: {
       // average rating of this tour (averaged from all the ratings (from reviews))
       type: Number,
-      default: 4.5,
       // Min rating should 1, and max should be 5
       // "min" and "max" are also for Numbers and Dates
       min: [1, 'Rating must be above or equal to 1.0'],
@@ -166,6 +165,21 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
+// INDEXING
+// Mongodb already creates indexes on _id fields, that they store in order somewhere outside the collection, when we query the results by id, mongodb goes through the indexes, instead of all the documents, hence we can create indexes of some other fields, so that when we search through that field (like price), instead of going through the documents, it goes to the indexes, such makes the query a lot faster
+tourSchema.index({
+  // "1" means we are sorting the price index in ascending order, and "-1" means the opposite
+  price: 1,
+  // We can add another field, for ratingsAverage as well, this will create compound index
+  ratingsAverage: -1,
+});
+
+// When we will create the SSR website, the tours will be most queried by "slug", so, creating an index for slug
+tourSchema.index({ slug: 1 });
+
+// STEPS TO CREATE AN INDEX
+// 1) If we have a collection, that have high write/read ratio (means write rate is high), then it makes no sense to create an index of any field, because we have to also update the index in memory (because the cost of always updating the index, and keeping it in the memory clearly outweighs, the benefits of having the index in the first place)
+
 // VIRTUAL PROPERTIES
 // Virtual Properties are not saved in the DB, but created on the fly
 // We cannot use this virtual property in the query, because they are not part of the DB
@@ -205,30 +219,6 @@ tourSchema.pre('save', function (next) {
   next();
 });
 
-// EMBEDDING THE USERS (GUIDES) IN TOUR MODEL
-/* tourSchema.pre('save', async function (next) {
-  // The guidesPromise will actually array of promises
-  const guidesPromise = this.guides.map(async guideId => {
-    return await User.findById(guideId);
-  });
-
-  this.guides = await Promise.all(guidesPromise);
-
-  next();
-});
-
-tourSchema.pre('save', function (next) {
-  console.log('From tourSchema second pre save middleware 😀😀😀');
-  next();
-});
-
-// Post document middleware: we have access to the nextFunction but also, document that has been saved as the first argument
-tourSchema.post('save', function (doc, next) {
-  console.log('From tourSchema Post middleware 😀😀😀 ', this === doc);
-  // "this" and "doc" will point to the same document that has been saved ("this" === "doc")
-  next();
-}); */
-
 // 2) Query Middleware
 // pre, and post "find" middleware (hook) is going to run before and after respectively of every "find" query
 // This middleware should execute for every query methods that starts with "find" (find, findById, findOne)
@@ -260,6 +250,7 @@ tourSchema.pre(/^find/, function (next) {
   next();
 });
 
+// Populating the reviews, on the findOne query of the tour
 tourSchema.pre('findOne', function (next) {
   // Here "this" is current query
   this.populate('reviews');
