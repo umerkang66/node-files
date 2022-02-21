@@ -15,21 +15,28 @@ router.post('/forgotPassword', authController.forgotPassword);
 // This will receive the token as well as the new password as the url parameter
 router.patch('/resetPassword/:token', authController.resetPassword);
 
+// FOR ALL THE ROUTES BELOW THIS ONE, YOU NEED TO HAVE AUTHENTICATED
+router.use(authController.protect);
+
 // For logged in users, update the password
-router.patch(
-  '/updateMyPassword',
-  authController.protect,
-  authController.updatePassword
-);
+router.patch('/updateMyPassword', authController.updatePassword);
 
 // USER CONTROLLERS
 // This is also a protected route, and the id of the user is going to come from req.user that is set by protect middleware
-router.patch('/updateMe', authController.protect, userController.updateMe);
+router.get('/me', userController.getMe, userController.getUser);
+router.patch('/updateMe', userController.updateMe);
 // This one also requires user to be logged in
-router.delete('/deleteMe', authController.protect, userController.deleteMe);
+router.delete('/deleteMe', userController.deleteMe);
+
+// FOR ALL THE ROUTES BELOW THIS ONE,THEY ARE ONLY ADMINS
+// Remember at this point, use is already logged in, we have already added protect middleware before
+router.use(authController.restrictTo('admin'));
 
 // For Administrators
-router.route('/').get(userController.getAllUsers);
+router
+  .route('/')
+  .get(userController.getAllUsers)
+  .post(userController.createUser);
 // we don't need to create the user here, because we have sign up for that
 
 router

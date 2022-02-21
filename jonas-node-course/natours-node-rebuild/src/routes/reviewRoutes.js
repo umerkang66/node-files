@@ -13,12 +13,14 @@ const router = Router({ mergeParams: true });
 // SimpleURl: POST '/api/v1/reviews
 // TourUrl: POST '/api/v1/tours/:tourId/reviews
 
+// ALL ROUTES ARE PROTECTED
+router.use(authController.protect);
+
 router
   .route('/')
   .get(reviewController.getAllReview)
   // Only authenticated users should create the reviews, and only "users", (!admins, !tourGuides)
   .post(
-    authController.protect,
     authController.restrictTo('user'),
     // Run this middleware before creating the review
     reviewController.setTourUserIds,
@@ -27,7 +29,14 @@ router
 
 router
   .route('/:id')
-  .patch(reviewController.updateReview)
-  .delete(reviewController.deleteReview);
+  .get(reviewController.getReview)
+  .patch(
+    authController.restrictTo('user', 'admin'),
+    reviewController.updateReview
+  )
+  .delete(
+    authController.restrictTo('user', 'admin'),
+    reviewController.deleteReview
+  );
 
 module.exports = router;

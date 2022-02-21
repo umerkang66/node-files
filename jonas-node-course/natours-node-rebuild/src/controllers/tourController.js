@@ -4,9 +4,7 @@ const Tour = require('../models/tourModel');
 const factory = require('./handleFactory');
 
 // Importing Utils
-const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
 
 // ROUTE HANDLER MIDDLEWARES
 exports.aliasTopTours = (req, res, next) => {
@@ -24,64 +22,9 @@ exports.aliasTopTours = (req, res, next) => {
 
 // ROUTE HANDLERS
 // catchAsync can also be called in the router file (that would have the same result), but we didn't do it because, we have to remember which function is the async and which function is not
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  /* // Mongoose way of filtering
-  const query = Tour.find()
-    .where('duration')
-    .equals(5)
-    .where('difficulty')
-    .equals('easy'); */
-
-  // ADDING API FEATURES
-  // 1st Argument: We can create query just by calling find without awaiting it
-  // We can use api features on every api endpoint that has find({}) query, create new instance of APIFeatures then just call the method, which feature we want to use
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-
-  // EXECUTE QUERY
-  const tours = await features.query;
-
-  // ERROR HANDLING IN GET_ALL_TOURS
-  // If no tours found, there is no need to send an error response, (just send an empty array), if there is some mongoose (DB) error then Promise will automatically rejected by mongoose, that error will be caught by catchAsync to globalErrorHandlingMiddleware
-
-  // SENDING RESPONSE
-  // By using this json method, we already set the Content-Type header to 'application/json'
-  res.status(200).json({
-    // "200" means response OK
-    status: 'success',
-    results: tours.length,
-    // We have set the tours because that's the name of the endpoint
-    data: { tours },
-  });
-});
-
-exports.getTour = catchAsync(async (req, res, next) => {
-  // This "id" is string
-  const { id } = req.params;
-  // Populate the users (guides) from the user model
-  const tour = await Tour.findById(id);
-
-  // If there is not tour, it is null
-  if (!tour) {
-    // Both Method 1, and 2 will work here
-
-    // Method 1: This error will be sent in catchAsync catch block to next function
-    // throw new AppError('Tour with this id is not found', 404);
-
-    // Method 2: This error is explicitly send off the next function here in this current function
-    // Make sure to return it
-    return next(new AppError('Tour with this id is not found', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: { tour },
-  });
-});
-
+exports.getAllTours = factory.getAll(Tour);
+// Populate the users (guides) from the user model, and reviews are also populated from Tour Model
+exports.getTour = factory.getOne(Tour);
 // The function that should be exported from controller, should be a function (not the returned value from function call)
 exports.createTour = factory.createOne(Tour);
 exports.updateTour = factory.updateOne(Tour);

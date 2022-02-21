@@ -3,9 +3,6 @@ const Review = require('../models/reviewModel');
 // IMPORTING THE HANDLE_FACTORY
 const factory = require('./handleFactory');
 
-// IMPORTING THE UTILS
-const catchAsync = require('../utils/catchAsync');
-
 // ROUTE MIDDLEWARES
 // In the create Review we need some additional steps, so we can create the middleware function, that will run before this handler
 exports.setTourUserIds = (req, res, next) => {
@@ -21,20 +18,9 @@ exports.setTourUserIds = (req, res, next) => {
 };
 
 // ROUTE HANDLERS
-exports.getAllReview = catchAsync(async (req, res, next) => {
-  // If the request is coming from tourRouter, then we have to send the reviews, specifically to that tours only, this is already done in the tourModel populating we can also do it here
-  const tour = req.params.tourId;
-  const filter = tour ? { tour } : {};
-
-  const reviews = await Review.find(filter);
-
-  res.status(200).json({
-    status: 'success',
-    results: reviews.length,
-    data: { reviews },
-  });
-});
-
+exports.getAllReview = factory.getAll(Review);
+// This getOne factory handler will work for both review routes, i.e. main route, and from tour route
+exports.getReview = factory.getOne(Review);
 exports.createReview = factory.createOne(Review);
 exports.updateReview = factory.updateOne(Review);
 exports.deleteReview = factory.deleteOne(Review);

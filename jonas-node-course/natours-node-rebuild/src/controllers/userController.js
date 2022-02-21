@@ -18,7 +18,15 @@ const filterReqBody = (reqObj, ...allowedFields) => {
   return newObj;
 };
 
-//  USER ROUTE HANDLERS
+// ROUTE MIDDLEWARES FOR THIS FILE
+// Logged in user can retrieve data about itself
+// This factory function uses the id from req.params.id, but if we are logged in we have to get id from req.user.id, This one will run before getOne(User)
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
+
+// USER ROUTE HANDLERS
 // This will not update the password, but will update the other user data like, email, photo, username etc
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) Create an error if the user tries to update the password here
@@ -61,22 +69,17 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 });
 
 // USER ACTIONS CONTROLLED BY ADMIN
-exports.getAllUsers = catchAsync(async (req, res) => {
-  // Explanation in tour controller file
-  const users = await User.find();
-
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: { users },
-  });
-});
-
-exports.getUser = (req, res) => {
-  res.send('getting user');
-};
-
+exports.getAllUsers = factory.getAll(User);
+exports.getUser = factory.getOne(User);
 // We don't need to create user here, because we have sign up for that
 // Don't attempt to change the password here in the updateUser
 exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);
+
+// Use sign-up to create user
+exports.createUser = (req, res, next) => {
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not defined',
+  });
+};

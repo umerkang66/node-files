@@ -21,20 +21,34 @@ router
 
 router.route('/tour-stats').get(tourController.getTourStats);
 // We should also be able to pass year through url params ("/:year")
-router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
+router
+  .route('/monthly-plan/:year')
+  .get(
+    authController.protect,
+    authController.restrictTo('admin', 'lead-guide', 'guide'),
+    tourController.getMonthlyPlan
+  );
 
 router
   .route('/')
-  .get(authController.protect, tourController.getAllTours)
+  .get(tourController.getAllTours)
   // checkBody before creating Tour
-  .post(tourController.createTour);
+  .post(
+    authController.protect,
+    authController.restrictTo('admin', 'lead-guide'),
+    tourController.createTour
+  );
 
 // put request have to receive full object that needs to be updated, but patch request can only send properties that needs to be updated in the object
 // We can also add optional parameters with "?"
 router
   .route('/:id')
   .get(tourController.getTour)
-  .patch(tourController.updateTour)
+  .patch(
+    authController.protect,
+    authController.restrictTo('admin', 'lead-guide'),
+    tourController.updateTour
+  )
   // For deleting the tour, user should be first logged in, then it should be an ADMIN and LEAD-GUIDE
   // restrictTo will return a function (that will act as middleware function)
   .delete(

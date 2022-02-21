@@ -83,7 +83,7 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// This will run when we will reset the password in authController
+// This will run when we will reset the password in authController, and update password
 userSchema.pre('save', function (next) {
   if (!this.isModified('password') || this.isNew) {
     // If password is not modified then call the next middleware
