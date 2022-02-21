@@ -2,6 +2,9 @@
 const Review = require('../models/reviewModel');
 // IMPORTING THE HANDLE_FACTORY
 const factory = require('./handleFactory');
+// IMPORTING THE UTILS
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 // ROUTE MIDDLEWARES
 // In the create Review we need some additional steps, so we can create the middleware function, that will run before this handler
@@ -16,6 +19,24 @@ exports.setTourUserIds = (req, res, next) => {
 
   next();
 };
+
+// This is also a protected middleware
+// Check if the user who, is trying to manipulate the review, is the same who created this review, except for the admin
+exports.sameUser = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const userRole = req.user.role;
+  const reviewId = req.params.id;
+
+  const actualReview = await Review.findById(reviewId);
+
+  if (userRole !== 'admin' && userId !== actualReview.user.id) {
+    return next(
+      new AppError('You are not the same user, who created this review', 401)
+    );
+  }
+
+  next();
+});
 
 // ROUTE HANDLERS
 exports.getAllReview = factory.getAll(Review);

@@ -56,6 +56,11 @@ const tourSchema = new mongoose.Schema(
       // "min" and "max" are also for Numbers and Dates
       min: [1, 'Rating must be above or equal to 1.0'],
       max: [5, 'Rating must be less or equal to 5'],
+      // set will run whenever new value will be set on the ratingsAverage
+      set: val => {
+        // if val is 4.66666, after Math.round it becomes 5, (but we need 4.7), so multiply the value with 10 before rounding (4.666 * 10 = 46.666), after rounding it becomes 47 then divide it by 10, then it becomes 4.7
+        return Math.round(val * 10) / 10;
+      },
     },
     ratingsQuantity: {
       // how many people have gave the review (that also contains rating)

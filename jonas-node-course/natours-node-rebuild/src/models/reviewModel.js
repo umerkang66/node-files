@@ -38,6 +38,10 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
+// INDEXES
+// By using this, user and tour combination on review should be unique, means a user cannot write multiple reviews on the same tour
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 // QUERY MIDDLEWARES
 // POPULATING THE USER, AND TOUR IN THE REVIEW
 reviewSchema.pre(/^find/, function (next) {
