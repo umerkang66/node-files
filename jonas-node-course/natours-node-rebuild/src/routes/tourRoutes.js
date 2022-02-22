@@ -29,6 +29,17 @@ router
     tourController.getMonthlyPlan
   );
 
+// GEO SPATIAL ROUTES
+// If i live in some place, so at the :distance i would say 300 miles (find the distance in 300 miles), and :latlng (where i live), and :unit is like miles or km (in which unit we have sent the data)
+router.get(
+  '/tours-within/:distance/center/:latlng/unit/:unit',
+  tourController.getToursWithin
+);
+
+// This one will calculate the the distances of tours from the location specified (:latlng) and also the unit (like km, or mi)
+router.get('/distances/:latlng/unit/:unit', tourController.getDistances);
+
+// STANDARD ROUTE HANDLERS
 router
   .route('/')
   .get(tourController.getAllTours)

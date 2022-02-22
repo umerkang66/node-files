@@ -182,6 +182,10 @@ tourSchema.index({
 // When we will create the SSR website, the tours will be most queried by "slug", so, creating an index for slug
 tourSchema.index({ slug: 1 });
 
+// For geo_spatial queries, in the tour controller, this index should be 2dsphere index, if the data describes the real point on the earth like sphere
+// We can also use 2d index, if we are using some fictional points on some two dimensional index
+tourSchema.index({ startLocation: '2dsphere' });
+
 // STEPS TO CREATE AN INDEX
 // 1) If we have a collection, that have high write/read ratio (means write rate is high), then it makes no sense to create an index of any field, because we have to also update the index in memory (because the cost of always updating the index, and keeping it in the memory clearly outweighs, the benefits of having the index in the first place)
 
@@ -276,6 +280,12 @@ tourSchema.post(/^find/, function (docs, next) {
 tourSchema.pre('aggregate', function (next) {
   // Here "this" is the current aggregation object
   // We have to add $match state in the beginning of pipeline (unshift array method) to remove secret tours from aggregation pipeline,
+
+  // Don't run this middleware before geoNear aggregation pipeline
+  if (Object.keys(this.pipeline()[0])[0] === '$geoNear') {
+    return next();
+  }
+
   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
 
   next();

@@ -28,6 +28,8 @@ exports.sameUser = catchAsync(async (req, res, next) => {
   const reviewId = req.params.id;
 
   const actualReview = await Review.findById(reviewId);
+  // typeof actualReview.user.id === string
+  // typeof actualReview.user._id === object
 
   if (userRole !== 'admin' && userId !== actualReview.user.id) {
     return next(
