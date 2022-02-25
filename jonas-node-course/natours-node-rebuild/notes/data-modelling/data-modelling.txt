@@ -31,3 +31,5 @@ HOW TO DECIDE ABOUT NORMALIZING OR DE_NORMALIZING
     1) RELATIONSHIP TYPE: How 2 datasets are related to each other
     2) DATA ACCESS PATTERNS: How often data is read and written, Read/Write ratio if the data is more read or more written
     3) DATA CLOSENESS: How we want to query the data from the DB
+
+OTHER IS IN THE DATA MODELLING SLIDES IN THE DATA MODELLING FOLDER
