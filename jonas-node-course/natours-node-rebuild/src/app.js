@@ -16,6 +16,7 @@ const rootDir = require('./utils/path');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 
 // Importing the Controllers
 const globalErrorHandler = require('./controllers/errorController');
@@ -23,7 +24,19 @@ const globalErrorHandler = require('./controllers/errorController');
 // Creating the application
 const app = express();
 
+// WIRING UP THE TEMPLATE ENGINE
+// Which template engine to use. express supports the "pug" out of the box, we just have tell the express, and not need to install the pug package
+app.set('view engine', 'pug');
+// Tell where will be the reviews will be stored in the project
+const viewsPath = path.join(rootDir, 'src', 'views');
+app.set('views', viewsPath);
+
 // MIDDLEWARES: These are the functions that can modify the request objects. Middlewares that exists firsts in the code, will be executed first
+
+// Serving static files
+const staticFilesPath = path.join(rootDir, 'public');
+// Fi express doesn't find any route, it will try to get that file from "public folder" because that is what we have specify in the express static middleware
+app.use(express.static(staticFilesPath));
 
 // Set Security HTTP headers
 app.use(helmet());
@@ -78,11 +91,6 @@ const limiter = rateLimit({
 // Apply this limiter on to /api
 app.use('/api', limiter);
 
-// Serving static files
-const staticFilesPath = path.join(rootDir, 'public');
-// Fi express doesn't find any route, it will try to get that file from "public folder" because that is what we have specify in the express static middleware
-app.use(express.static(staticFilesPath));
-
 // In "use" methods we can specify any middlewares that calls next unless we send the response to client (ending the request-response cycle)
 app.use((req, res, next) => {
   // Because we didn't specify an routes, this middleware will run for every request
@@ -92,6 +100,10 @@ app.use((req, res, next) => {
 
 // PLUGGING THE ROUTES IN EXPRESS
 // We can also specify the routes in the use function, then callback functions will be applied to specifically to that request url
+// Views Routes
+app.use('/', viewRouter);
+
+// Api Routes
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 // We can use reviewRouter directly from here, but it can also be accessed from the tourRouter

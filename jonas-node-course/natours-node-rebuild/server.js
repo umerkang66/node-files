@@ -22,15 +22,16 @@ console.log(app.get('env'));
 console.log(process.env.NODE_ENV); */
 
 // CONNECTING TO THE DB
-// Creating the db (mongodb-atlas) connection string
+
+/* // Creating the db (mongodb-atlas) connection string
 const DB = process.env.DATABASE.replace(
   '<PASSWORD>',
   process.env.DATABASE_PASSWORD
-);
+); */
 
-// const DB_LOCAL = process.env.DATABASE_LOCAL;
+const DB_LOCAL = process.env.DATABASE_LOCAL;
 
-mongoose.connect(DB).then(() => console.log('Db connection successful'));
+mongoose.connect(DB_LOCAL).then(() => console.log('Db connection successful'));
 
 // START THE SERVER
 const port = process.env.PORT || 3000;
