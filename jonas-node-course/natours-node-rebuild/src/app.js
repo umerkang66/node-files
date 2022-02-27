@@ -2,11 +2,12 @@ const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 // http parameter pollution
 const hpp = require('hpp');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 // Importing the utils
 const AppError = require('./utils/appError');
@@ -24,6 +25,9 @@ const globalErrorHandler = require('./controllers/errorController');
 // Creating the application
 const app = express();
 
+// ADDING CORS
+app.use(cors());
+
 // WIRING UP THE TEMPLATE ENGINE
 // Which template engine to use. express supports the "pug" out of the box, we just have tell the express, and not need to install the pug package
 app.set('view engine', 'pug');
@@ -38,16 +42,14 @@ const staticFilesPath = path.join(rootDir, 'public');
 // Fi express doesn't find any route, it will try to get that file from "public folder" because that is what we have specify in the express static middleware
 app.use(express.static(staticFilesPath));
 
-// Set Security HTTP headers
-app.use(helmet());
-
 // By using the express.json() data from the request body (that comes in streams) collected and stored the req.body object
-app.use(
-  express.json({
-    // We can limit the data coming into the req object
-    limit: '10kb',
-  })
-);
+// We can limit the data coming into the req object
+app.use(express.json({ limit: '10kb' }));
+// Parse req.body from url encoding (that is sent by automatic forms post request)
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
+// Parse cookies from browser request
+app.use(cookieParser());
 
 // After reading the data from express.json() then sanitize it
 // Data sanitization against NoSQL query injection
@@ -122,7 +124,7 @@ app.all('*', (req, res, next) => {
   next(err);
 });
 
-// Global Error Handling Middleware
+// Global Error Handling Middleware, also error of rendered pages also handled here
 app.use(globalErrorHandler);
 
 module.exports = app;

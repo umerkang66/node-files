@@ -9,6 +9,7 @@ const router = Router();
 // AUTH CONTROLLERS: For Users
 router.post('/signup', authController.signup);
 router.post('/login', authController.login);
+router.get('/logout', authController.logout);
 
 // Forgot password should only receive email address
 router.post('/forgotPassword', authController.forgotPassword);

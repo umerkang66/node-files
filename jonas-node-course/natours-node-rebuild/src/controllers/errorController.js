@@ -46,37 +46,67 @@ const handleTokenExpiredError = () => {
 };
 
 // SENDING ERRORS IN DEVELOPMENT AND PRODUCTION
-const sendErrorDev = (err, res) => {
+const sendErrorDev = (err, req, res) => {
   // In the development send as much information as possible
 
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-    error: err,
-    stack: err.stack,
+  // API
+  if (req.originalUrl.startsWith('/api')) {
+    // This error should be send if the 'url' starts with '/api/v1'
+    return res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message,
+      error: err,
+      stack: err.stack,
+    });
+  }
+
+  // RENDERED WEBSITE
+  // If the 'url' starts with '/' then render an error page
+  res.status(err.statusCode).render('error', {
+    title: 'Something went wrong',
+    msg: err.message,
   });
 };
 
-const sendErrorProd = (err, res) => {
-  if (err.isOperational) {
-    // In production, only send status, and message, and errors that are only operational, not programming error
-    // Operational errors are trusted errors, so we can send them to client
-    res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message,
-    });
-  } else {
+const sendErrorProd = (err, req, res) => {
+  // HANDLING PRODUCTION ERRORS FROM API
+  if (req.originalUrl.startsWith('/api')) {
+    if (err.isOperational) {
+      // In production, only send status, and message, and errors that are only operational, not programming error
+      // Operational errors are trusted errors, so we can send them to client
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+    }
+
     // This is for programming error, and we don't want to leak the error detail, these can also be synchronous code errors IMP! in asynchronous code (that are not handled by global UNCAUGHT EXCEPTIONS)
 
     // If this weird error occurs, we, developers have to know what kind of error happened, so LOG it to the console
     console.error('PROGRAMMING ERROR FROM PROD 💥💥💥', err);
 
     // here send only some generic message,
-    res.status(500).json({
+    return res.status(500).json({
       status: 'error',
       message: 'Something went very wrong',
     });
   }
+
+  // HANDLING PRODUCTION ERRORS FROM RENDERED WEBSITE
+  // If there is an operational error (errors that we have created ourselves)
+  if (err.isOperational) {
+    return res.status(err.statusCode).render('error', {
+      title: 'Something went wrong',
+      msg: err.message,
+    });
+  }
+
+  console.error('PROGRAMMING ERROR FROM PROD 💥💥💥', err);
+
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong!',
+    msg: 'Please try again later',
+  });
 };
 
 // If there are 4 arguments, express will automatically recognize it as error handling middleware, where first argument will be actual error object
@@ -90,7 +120,7 @@ const errorController = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     // Development error should have everything in their response
 
-    sendErrorDev(err, res);
+    sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
     // There are 3 types of errors that might be created by mongoose, and they !isOperational property, so we have to manually mark them as isOperational = true in production (in development we don't care)
 
@@ -137,7 +167,7 @@ const errorController = (err, req, res, next) => {
       error = handleTokenExpiredError();
     }
 
-    sendErrorProd(error, res);
+    sendErrorProd(error, req, res);
   }
 };
 

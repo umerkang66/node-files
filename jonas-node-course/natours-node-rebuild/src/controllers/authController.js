@@ -108,17 +108,40 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+// Logging out the user
+exports.logout = (req, res, next) => {
+  // By setting the fake cookie as the exact same name "jwt" we can simply just log out the users
+  // Secret is to give it the exact same name
+  res.cookie('jwt', 'loggedOut', {
+    // This will expires in 10 seconds from now
+    expires: new Date(Date.now() + 10 * 1000),
+    // By using this cookie cannot be modified by any way by browser
+    httpOnly: true,
+  });
+
+  // We don't need to set it to secure (use only https) because there is not sensitive data
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Logged out successfully',
+  });
+};
+
 // This is going to be a middleware function, that will before some other route handler (then that handler will become protected)
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting the token from req headers and check of it's there
   let token;
 
   if (
+    // This is for POSTMAN
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
     // req.headers.authorization will be 'Bearer {{token}}', we need to extract the token (remove "Bearer" string part)
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    // This is for browser cookies
+    token = req.cookies.jwt;
   }
 
   if (!token) {
@@ -154,8 +177,53 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // Grant access to the next protected route handler, and put the entire user data on the req.user
   req.user = currentUser;
+  // When this middleware run before views controller then, this this will be helpful, more explanation is in the isLoggedIn function
+  res.locals.user = currentUser;
   next();
 });
+
+// This middleware runs before every get request to the views, then the pug templates will run different things, based on that the user is logged in or not
+// This one just checks if the user is logged in or not, so this one will not throw an error
+// IMPORTANT! Don't use catchAsync here, catch the errors locally, and if there is an error just call the next middleware
+exports.isLoggedIn = async (req, res, next) => {
+  try {
+    // 1) Getting the token from browser cookie, and check of it's there
+    if (req.cookies.jwt) {
+      // This is for browser cookies
+      const token = req.cookies.jwt;
+
+      // 2) Verification of token
+      // If this promise rejected we have already handled that in our error controller
+      const decoded = await jwtVerifyPromisified(token, process.env.JWT_SECRET);
+
+      // 3) Check if user still exists
+      // If the user is deleted by user himself or admin, then this token should not work, but currently it will work (so we have to change it)
+
+      // We have encoded the userId as "id" in the jwt
+      const currentUser = await User.findById(decoded.id);
+
+      // If there is an error, just don't return an error, but call the next middleware
+      if (!currentUser) return next();
+
+      // 4) Check if user changed password after the token was issued
+      // This will return true, if the user changed their password
+      if (currentUser.changedPasswordAfter(decoded.iat)) {
+        // If user has changed his password, and someone has steel his previous password or token then after changing the password that previous token should not work, we are going to implement it on the instance method
+        return next();
+      }
+
+      // There is a logged in user
+      // Every pug template has access to the local object, there we can access the user variable
+      res.locals.user = currentUser;
+      return next();
+    }
+  } catch (err) {
+    return next();
+  }
+
+  // In case there is not cookie, also call next
+  next();
+};
 
 // If user is logged, further if we want to restrict the routes to the certain types of logged in users
 exports.restrictTo = (...roles) => {
