@@ -44,6 +44,13 @@ block content
               input#email-update.form__input(type='email', value=`${user.email}`, required, name='email')
             .form__group.form__photo-upload
               img.form__user-photo(src=`/img/users/${user.photo}`, alt='User photo')
+
+              //- INPUT TYPE FILE, This will handle the uploading of the image
+              //- "accept='image/*'" means accept all type of images
+              //- If we want to send the photo using without API we have to set another option for input that is enctype='multipart/form-data'
+              //- "multipart" is used to send files to the server
+              //- Also specify the name='photo' because multer is expecting the field as "photo"
+
               input.form__upload(type='file', accept='image/*', id='photo', name='photo')
               label(for='photo') Choose new photo
               

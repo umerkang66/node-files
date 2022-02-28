@@ -58,6 +58,10 @@ router
   .patch(
     authController.protect,
     authController.restrictTo('admin', 'lead-guide'),
+    // Updating the tour images middleware
+    tourController.uploadTourImages,
+    // Resizing the tour images middleware
+    tourController.resizeTourImages,
     tourController.updateTour
   )
   // For deleting the tour, user should be first logged in, then it should be an ADMIN and LEAD-GUIDE

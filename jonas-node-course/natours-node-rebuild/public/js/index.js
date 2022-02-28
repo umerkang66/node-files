@@ -41,14 +41,20 @@ if (updateSettingsForm) {
   updateSettingsForm.addEventListener('submit', async event => {
     event.preventDefault();
 
-    const name = document.getElementById('name-update').value;
-    const email = document.getElementById('email-update').value;
-    const buttonEl = document.querySelector('.btn--save-settings');
+    // Images are sent through form data, the data other that files in formData will be automatically be sent in the req.body, and files in req.file
+    const form = new FormData();
 
+    form.append('name', document.getElementById('name-update').value);
+    form.append('email', document.getElementById('email-update').value);
+    form.append('photo', document.getElementById('photo').files[0]);
+
+    console.log(form);
+
+    const buttonEl = document.querySelector('.btn--save-settings');
     buttonEl.textContent = 'Processing...';
     buttonEl.style.opacity = 0.7;
 
-    await updateSettings({ name, email }, 'data');
+    await updateSettings(form, 'data');
 
     buttonEl.textContent = 'Save settings';
     buttonEl.style.opacity = 1;

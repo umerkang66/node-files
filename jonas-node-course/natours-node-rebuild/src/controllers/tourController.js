@@ -6,6 +6,8 @@ const factory = require('./handleFactory');
 // Importing Utils
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const upload = require('../utils/uploadTourImages');
+const resizeTourImages = require('../utils/resizeTourImages');
 
 // ROUTE HANDLER MIDDLEWARES
 exports.aliasTopTours = (req, res, next) => {
@@ -20,6 +22,25 @@ exports.aliasTopTours = (req, res, next) => {
   // Make sure to call next()
   next();
 };
+
+// HANDLING UPLOADING THE IMAGES: This will run before createTour
+// Some fields expects multiple images, and some fields expects only 1 image, then we use fields
+// Currently we are only saving it to the memory
+// This will be actually a middleware
+exports.uploadTourImages = upload.fields([
+  // "imageCover" will only able to upload 1 image
+  { name: 'imageCover', maxCount: 1 },
+  // "images" will only able to upload 3 image
+  { name: 'images', maxCount: 3 },
+]);
+
+// If we have only one field with multiple images then we will use upload.array()
+// upload.array('images', 3);
+// If there is only 1 then,
+// upload.single('image');
+
+// This will run after the images have been uploaded in the memory (upper middleware)
+exports.resizeTourImages = resizeTourImages;
 
 // ROUTE HANDLERS
 // catchAsync can also be called in the router file (that would have the same result), but we didn't do it because, we have to remember which function is the async and which function is not
