@@ -12,7 +12,7 @@ const User = require('../models/userModel');
 // Explanation of catchAsync is in the tourController and catchAsync file
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const sendEmail = require('../utils/email');
+const Email = require('../utils/email');
 
 // AUTH CONTROLLER UTILS
 const jwtVerifyPromisified = promisify(jwt.verify);
@@ -73,6 +73,11 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   // After signing up, log in the user
   // Usually when we signup for any web application, we also get automatically logged in (just log in no need to check for the password is correct or something like that)
+
+  // Send welcome email
+  // The url will point to the /me because we want to tell the user to upload the user photo
+  const url = `${req.protocol}://${req.get('host')}/me`;
+  await new Email(newUser, url).sendWelcome();
 
   // "201" means created
   createSendToken(newUser, 201, res);
@@ -270,22 +275,15 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   // 3) Send it to the user's email
-  // "req.protocol" may be "http" or "https"
-  // "host" can be localhost or the production url itself
-  const resetUrl = `${req.protocol}://${req.get(
-    'host'
-  )}/api/v1/users/resetPassword/${resetToken}`;
-
-  const message = `Forgot your password? Submit a PATCH request with your new password, and passwordConfirm to: ${resetUrl}\nIf you didn't forget the password, simply please ignore this email`;
-
   // Here we need to do more than just catchErrors so create an tryCatch block
   try {
-    await sendEmail({
-      // Send the email to the user email or req.body.email both are same
-      email: user.email,
-      subject: 'Your password reset token (valid for 10 minutes only)',
-      message,
-    });
+    // "req.protocol" may be "http" or "https"
+    // "host" can be localhost or the production url itself
+    const resetUrl = `${req.protocol}://${req.get(
+      'host'
+    )}/api/v1/users/resetPassword/${resetToken}`;
+
+    await new Email(user, resetUrl).sendResetPassword();
 
     // We should not sent it to the response (because here everyone could get it, so send it to the email)
     res.status(200).json({
