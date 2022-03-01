@@ -7,6 +7,7 @@
     "no-console": "warn",
     "consistent-return": "off",
     "func-names": "off",
+    "no-useless-catch": "off",
     "object-shorthand": "off",
     "no-process-exit": "off",
     "no-param-reassign": "off",

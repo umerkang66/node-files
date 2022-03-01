@@ -68,18 +68,31 @@ class Email {
 
     // 3) Create a transport and send email
     const transporter = this._newTransport();
-    await transporter.sendMail(mailOptions);
+
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (err) {
+      throw err;
+    }
   }
 
   async sendWelcome() {
-    await this._send('welcome', 'Welcome to the natours family');
+    try {
+      await this._send('welcome', 'Welcome to the natours family');
+    } catch (err) {
+      throw err;
+    }
   }
 
   async sendResetPassword() {
-    await this._send(
-      'passwordReset',
-      'Your password reset token (value for only 10 minutes)'
-    );
+    try {
+      await this._send(
+        'passwordReset',
+        'Your password reset token (value for only 10 minutes)'
+      );
+    } catch (err) {
+      throw err;
+    }
   }
 }
 

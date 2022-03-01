@@ -1,6 +1,7 @@
 // Importing the models
 const Tour = require('../models/tourModel');
 const User = require('../models/userModel');
+const Booking = require('../models/bookingModel');
 
 // Importing the utils
 const catchAsync = require('../utils/catchAsync');
@@ -64,5 +65,19 @@ exports.updateUserData = catchAsync(async (req, res, next) => {
     title: 'Your account',
     // This user will override the res.locals.users property in the template
     user: updatedUser,
+  });
+});
+
+exports.getMyTours = catchAsync(async (req, res, next) => {
+  const bookings = await Booking.find({ user: req.user.id });
+
+  const tourIds = bookings.map(booking => booking.tour.id);
+
+  // $in operators expects an array, that will find by property provided (that is _id) in that array provided (that is tourIds)
+  const tours = await Tour.find({ _id: { $in: tourIds } });
+
+  res.status(200).render('overview', {
+    title: 'My Bookings',
+    tours,
   });
 });
