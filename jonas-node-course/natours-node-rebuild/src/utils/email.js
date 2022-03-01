@@ -15,10 +15,17 @@ class Email {
 
   // 1) Create the transporter
   // Transporter is the server that will send the emails, because it is not node js that send the emails in development it is mail trap, and in production it is sendGrid
-  newTransport() {
+  _newTransport() {
     if (process.env.NODE_ENV === 'production') {
-      // SendGrid
-      return 1;
+      // SendGrid, currently sendGrid is not working (because my ip address is blocked)
+      return nodemailer.createTransport({
+        // SendGrid is already pre-defined
+        service: 'SendGrid',
+        auth: {
+          user: process.env.SENDGRID_USERNAME,
+          pass: process.env.SENDGRID_PASSWORD,
+        },
+      });
     }
 
     return nodemailer.createTransport({
@@ -60,7 +67,7 @@ class Email {
     };
 
     // 3) Create a transport and send email
-    const transporter = this.newTransport();
+    const transporter = this._newTransport();
     await transporter.sendMail(mailOptions);
   }
 
