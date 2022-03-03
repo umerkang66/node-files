@@ -25,7 +25,7 @@ fs.readFile('test-file.txt', (err, data) => {
 
   // crypto tasks will send off to thread pool (and there are 4 threads in the thread pool), so if we use 4 crypto operations, they all will happen in the same time, but if we add from 5 to 8, they will take the double amount of time
   // Because on the 5th crypto operation, all the threads in the thread pool will be filled, and the 5th one will only run after one of the thread in the thread pool will be free
-  // If these were synchronous functions that will block the main thread of node js, so the the processes of event-loop will run after this synchronous tasks (like Timers, setImmediate, and nextTick function)
+  // If these were synchronous functions that will block the main thread of node js, so the processes of event-loop will run after this synchronous tasks (like Timers, setImmediate, and nextTick function)
   crypto.pbkdf2('password', 'salt', 100000, 1024, 'sha512', () => {
     console.log(Date.now() - start, 'password encrypted');
   });
@@ -43,4 +43,5 @@ fs.readFile('test-file.txt', (err, data) => {
   });
 });
 
+// At first top level code will be done
 console.log('Hello from the top level code');

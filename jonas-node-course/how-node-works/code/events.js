@@ -22,7 +22,7 @@ emitter.on('newSale', stock => {
   console.log(`There are now ${stock} items left in the stock`);
 });
 
-// We can pass other arguments, that will become arguments of callback functions
+// We can pass other arguments, that will become arguments of the event-listener callback functions
 emitter.emit('newSale', 9);
 
 /////////////////

@@ -16,7 +16,7 @@ REQUIRE FUNCTION: function to require module
 MODULE: reference to the current module
 EXPORTS: A reference to module.exports used to export object from a module
 __FILENAME: absolute path of the current module's file
-__DIRNAME: directory name of hte current module
+__DIRNAME: directory name of the current module
 
 4) Require function return exports of the required module, module.exports is the returned object (important), we can assign variable to the return object from the require function
 
