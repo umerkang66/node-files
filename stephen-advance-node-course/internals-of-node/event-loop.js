@@ -1,15 +1,15 @@
 // ALL OF THIS IS FAKE CODE
-/* Event Loop is single-threaded, but more complicated tasks are sent off to the thread-pool, which currently uses 4 threads (that we can change). Every Asynchronous operation in top-level code creates its own callback queue, and event-loop, but asynchronous operations that are inside of the event-loop, then they run in order, that is explained further in this file */
+/* Event Loop is single-threaded, but more complicated tasks are sent off to the thread-pool, which currently uses 4 threads (that we can change). Every Asynchronous operation in top-level code creates its own callback queue, and then its callbacks will runs in the event-loop (event-loops starts after the top-level code is executed), but asynchronous operations that are inside of the event-loop, then they run in order, that is explained further in this file */
 
 // CALLBACK QUEUES: These array are created when node.js starts the program, by detecting these three types of callbacks (there is also close callbacks)
 const pendingTimers = [];
-// Like http server
+// Like http server: offloaded tasks to the OS
 const pendingOSTasks = [];
-// Like functions from fs
+// Like functions from fs, crypto
 const pendingOperations = [];
 
 // Start the node process: node myFile.js
-// 1) At first all the top-level code is executed (so top level code doesn't have to be asynchronous, it can be synchronous)
+// 1) At first all the top-level code is executed (so top level code doesn't have to be asynchronous, it can be synchronous usually), but it can also be asynchronous, that just put its callbacks in the callback queue
 myFile.runToplevelContent();
 
 // 2) Enters the node.js event-loop (pretending the event-loop as while loop)
