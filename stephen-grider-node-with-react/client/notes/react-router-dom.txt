@@ -1,0 +1,3 @@
+SWITCH: What "Switch" does it that it will find the first route and render it, it doesn't will find the next one
+
+EXACT: What "exact" does it that router will render only the Landing page on the root route, without it will render all the three routes because all the them starts with "/"
