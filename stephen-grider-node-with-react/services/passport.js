@@ -25,7 +25,7 @@ passport.deserializeUser(async (userId, done) => {
   // If the user is exists, then it will authorize the other requests
   done(null, user);
 
-  // IMPORTANT! After this user will be added to the "req.user" property, that can be checked and in the "protect" middleware, and routes can be protected
+  // IMPORTANT! After this user will be added to the "req.user" property, this is just like the "protect" middleware, and routes can be protected
 });
 
 // Creating google strategy that will be wired up in passport
@@ -47,8 +47,10 @@ const googleStrategyCallback = async (
     return done(null, existingUser);
   }
 
+  const email = profile.emails[0].value;
+
   // 3) Create if user doesn't exit
-  const newUser = new User({ googleId: profile.id });
+  const newUser = new User({ googleId: profile.id, email });
   await newUser.save();
 
   // We are done with the user creation in DB, and there is not error, second argument is the existing user, that will be sent to the serializeUser method

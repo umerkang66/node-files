@@ -5,12 +5,12 @@ import { connect } from 'react-redux';
 // Components
 import Header from './Header';
 import Landing from './Landing';
+import Dashboard from './Dashboard';
+import SurveyNew from './surveys/SurveyNew';
+import NotFound from './NotFound';
+
 // Actions
 import { fetchUser } from '../actions';
-
-const Dashboard = () => <h2>Dashboard</h2>;
-const SurveyNew = () => <h2>SurveyNew</h2>;
-const NotFound = () => <h2>404 PAGE NOT FOUND</h2>;
 
 const App = ({ fetchUser }) => {
   useEffect(() => {

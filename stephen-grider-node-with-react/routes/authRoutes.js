@@ -1,6 +1,6 @@
 const passport = require('passport');
 
-module.exports = app => {
+const authRoutes = app => {
   app.get(
     '/auth/google',
     passport.authenticate('google', {
@@ -34,3 +34,5 @@ module.exports = app => {
     res.send(req.user);
   });
 };
+
+module.exports = authRoutes;
