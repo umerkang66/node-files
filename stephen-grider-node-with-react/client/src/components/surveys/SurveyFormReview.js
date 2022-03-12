@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { FIELDS } from './formFields';
@@ -6,6 +7,7 @@ import { submitSurvey } from '../../actions';
 
 const SurveyFormReview = ({ onCancel, formValues, submitSurvey }) => {
   const history = useHistory();
+  const [submitBtnValue, setSubmitBtnValue] = useState('Send Survey');
 
   const renderReviewFields = () => {
     return FIELDS.map(({ label, name }) => {
@@ -29,10 +31,11 @@ const SurveyFormReview = ({ onCancel, formValues, submitSurvey }) => {
       </button>
 
       <button
-        onClick={() => submitSurvey(formValues, history)}
+        onClick={() => submitSurvey(formValues, history, setSubmitBtnValue)}
         className="green btn right"
       >
-        Send Survey <i className="material-icons right">email</i>
+        {submitBtnValue}
+        <i className="material-icons right">email</i>
       </button>
     </div>
   );
