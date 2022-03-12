@@ -11,6 +11,15 @@ const surveyTemplate = require('../services/emailTemplates/surveyTemplate');
 const Survey = mongoose.model('surveys');
 
 const surveyRoutes = app => {
+  // Get all the surveys of the current user
+  app.get('/api/surveys', requireLogin, async (req, res) => {
+    const surveys = await Survey.find({ _user: req.user.id }).select({
+      recipients: 0,
+    });
+
+    res.send(surveys);
+  });
+
   // When user will give feedback from email this will run
   app.get('/api/surveys/:surveyId/:response', (req, res) => {
     res.send('Thanks for voting!!');
@@ -69,7 +78,7 @@ const surveyRoutes = app => {
       title,
       subject,
       body,
-      recipients: recipients.split(',').map(email => ({ email: email })),
+      recipients: recipients.split(',').map(email => ({ email: email.trim() })),
       _user: req.user.id,
       dateSent: Date.now(),
     });
