@@ -12,7 +12,7 @@ const connectToRedis = async () => {
 // Any time query is executed (using await) this exec function execute it
 const exec = mongoose.Query.prototype.exec;
 
-// We have done because we want to make the cache function chain-able, it can be used before or after any other query methods of mongoose
+// We have done this because we want to make the cache function chain-able, it can be used before or after any other query methods of mongoose
 mongoose.Query.prototype.cache = function (options = {}) {
   // options can have optional "key" property
   this.useCache = true;
