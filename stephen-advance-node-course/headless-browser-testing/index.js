@@ -10,7 +10,7 @@ require('./models/Blog');
 require('./services/passport');
 require('./services/cache');
 
-mongoose.connect(keys.mongoURI);
+mongoose.connect(keys.mongoURI).then(() => console.log('Connected To DB'));
 
 const app = express();
 

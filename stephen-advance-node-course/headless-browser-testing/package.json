@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "jest": {
+    "setupTestFrameworkScriptFile": "./tests/setup.js"
+  },
   "scripts": {
     "start": "node index.js",
     "server": "nodemon index.js --ignore tests",
@@ -12,7 +15,7 @@
     "heroku-postbuild": "npm run build",
     "test": "jest"
   },
-  "author": "",
+  "author": "Umer Kang",
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.188.0",

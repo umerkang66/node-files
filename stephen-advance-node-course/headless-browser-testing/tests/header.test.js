@@ -1,23 +1,37 @@
-const puppeteer = require('puppeteer');
+const Page = require('./helpers/page');
 
-test('Adds two numbers', () => {
-  const sum = 1 + 2;
-  expect(sum).toEqual(3);
+// We need these variables in other functions as well
+let page;
+
+beforeEach(async () => {
+  page = await Page.build();
+  await page.goto('http://localhost:3000');
 });
 
-test('We can launch a browser', async () => {
-  // Create headless browser (without UI)
-  // By default launch will happens in headless mode (without UI)
-  const browser = await puppeteer.launch({
-    headless: false,
-  });
-  // Create browser tab (page)
-  const page = await browser.newPage();
-  // Go to http://localhost:5000
-  await page.goto('http://127.0.0.1:3000');
+afterEach(async () => {
+  // Browser functionality is also handled by page
+  await page.close();
+});
 
+test('it has the logo with correct text', async () => {
   // Select the anchor tag from the dom
-  const text = await page.$eval('a.brand-logo', el => el.innerHTML);
+  await page.waitFor('a.brand-logo');
+  const text = await page.getContentsOf('a.brand-logo');
+  expect(text.toLowerCase() === 'blogster');
+});
 
-  expect(text.toLowerCase() === 'Blogster');
+test('clicking login starts oauth flow', async () => {
+  await page.waitFor('.right a');
+  await page.click('.right a');
+  const url = await page.url();
+
+  // Check if url contains "accounts.google.com"
+  expect(url).toMatch(/accounts\.google\.com/);
+});
+
+test('when signed in, shows logout button', async () => {
+  await page.login();
+  const text = await page.getContentsOf('a[href="/auth/logout"]');
+
+  expect(text).toEqual('Logout');
 });
