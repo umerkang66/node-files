@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 const redis = require('redis');
+const keys = require('../config/keys');
 
 const connectToRedis = async () => {
-  const redisUrl = 'redis://127.0.0.1:6379';
-  const client = redis.createClient({ url: redisUrl });
+  // const redisUrl = 'redis://127.0.0.1:6379';
+  const client = redis.createClient({ url: keys.redisUrl });
   await client.connect();
 
   return client;

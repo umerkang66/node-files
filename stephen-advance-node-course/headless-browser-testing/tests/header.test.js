@@ -5,6 +5,7 @@ let page;
 
 beforeEach(async () => {
   page = await Page.build();
+  // IMP! On the travis make sure to add "http"
   await page.goto('http://localhost:3000');
 });
 

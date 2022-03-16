@@ -7,7 +7,10 @@ class CustomPage {
     // Create headless browser (without UI)
     // By default launch will happens in headless mode (without UI)
     const browser = await puppeteer.launch({
-      headless: false,
+      // Should be false in dev, and true in ci, tests are no longer exist in prod
+      headless: true,
+      // This will dramatically decrease the time to run the test
+      args: ['--no-sandbox'],
     });
 
     // Combine page, customPage, and browser through proxy
@@ -43,6 +46,7 @@ class CustomPage {
     await this.page.setCookie({ name: 'session', value: session });
     await this.page.setCookie({ name: 'session.sig', value: sig });
     // Refresh the page
+    // IMP! On the travis make sure to add "http"
     await this.page.goto('http://localhost:3000/blogs');
     // Testing environment tends to do things as fast as possible, and it executes even before the page loaded, thus we have introduce a little pause here
     await this.page.waitFor('a[href="/auth/logout"]');
