@@ -15,8 +15,8 @@ afterEach(async () => {
   await page.close();
 });
 
-afterAll(() => {
-  mongoose.disconnect();
+afterAll(async () => {
+  await mongoose.disconnect();
 });
 
 test('it has the logo with correct text', async () => {

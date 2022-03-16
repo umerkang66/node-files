@@ -13,8 +13,8 @@ afterEach(async () => {
   await page.close();
 });
 
-afterAll(() => {
-  mongoose.disconnect();
+afterAll(async () => {
+  await mongoose.disconnect();
 });
 
 describe('When logged in', () => {
