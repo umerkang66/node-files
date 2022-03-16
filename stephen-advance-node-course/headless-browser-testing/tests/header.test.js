@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Page = require('./helpers/page');
 
 // We need these variables in other functions as well
@@ -12,6 +13,10 @@ beforeEach(async () => {
 afterEach(async () => {
   // Browser functionality is also handled by page
   await page.close();
+});
+
+afterAll(() => {
+  mongoose.disconnect();
 });
 
 test('it has the logo with correct text', async () => {
