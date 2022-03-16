@@ -13,6 +13,7 @@ afterEach(async () => {
   await page.close();
 });
 
+// For every file new connection with mongodb will be created, so disconnect in every test file, it is for jest, but in mocha, the connection only created one time
 afterAll(async () => {
   await mongoose.disconnect();
 });
