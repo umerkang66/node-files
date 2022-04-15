@@ -12,13 +12,7 @@ import { MessagesService } from './messages.service';
 
 @Controller('/messages')
 export class MessagesController {
-  messagesService: MessagesService;
-
-  constructor() {
-    // Service is creating its own dependencies
-    // DONT DO THIS ON REAL APPLICATIONS
-    this.messagesService = new MessagesService();
-  }
+  constructor(private messagesService: MessagesService) {}
 
   @Get()
   public async getMessages(): Promise<Message[]> {
