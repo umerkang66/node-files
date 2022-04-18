@@ -9,7 +9,6 @@ class Mailer {
 
   constructor({ subject, recipients }, content) {
     this.sgMail = sgMail.setApiKey(keys.sendGridKey);
-
     this.msg = {
       to: this.formatRecipients(recipients),
       from: this.verifiedSenderEmail,
