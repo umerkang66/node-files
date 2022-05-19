@@ -34,7 +34,6 @@ const readFile = async function () {
     );
 
     const allRes = await Promise.all([res1Promise, res2Promise, res3Promise]);
-
     const allImgs = allRes.map(res => res.body.message);
 
     writeFilePromise(`${__dirname}/outputDog.txt`, allImgs.join('\n'));
@@ -48,8 +47,8 @@ const readFile = async function () {
 
 (async () => {
   try {
-    const umerData = await readFile();
-    console.log(umerData);
+    const data = await readFile();
+    console.log(data);
   } catch (err) {
     console.log(err);
   }
