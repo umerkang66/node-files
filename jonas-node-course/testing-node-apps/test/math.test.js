@@ -9,31 +9,31 @@ beforeEach(() => {
 
 test('Should calculate total with tip', () => {
   const total = calculateTip(bill, tipPercent);
-  expect(total).toEqual(estimatedTotal);
+  expect(total).toBe(estimatedTotal);
 });
 
 test('Should calculate total with tip, with the default value tip of 0.2', () => {
   const total = calculateTip(bill);
-  expect(total).toEqual(estimatedTotal);
+  expect(total).toBe(estimatedTotal);
 });
 
 test('Async test demo', done => {
   setTimeout(() => {
-    expect(1).toEqual(1);
+    expect(1).toBe(1);
     done();
   }, 3000);
 });
 
 test('Should add two numbers with then', done => {
   add(4, 5).then(addition => {
-    expect(addition).toEqual(4 + 5);
+    expect(addition).toBe(4 + 5);
     done();
   });
 });
 
 test('Should add two numbers', async () => {
   const addition = await add(4, 5);
-  expect(addition).toEqual(4 + 5);
+  expect(addition).toBe(4 + 5);
 });
 
 test('Add function rejects because of non-positive numbers', async () => {
@@ -41,6 +41,6 @@ test('Add function rejects because of non-positive numbers', async () => {
     await add(-1, 4);
   } catch (err) {
     const errMsg = 'Numbers must be non-negative';
-    expect(err.message).toEqual(errMsg);
+    expect(err.message).toBe(errMsg);
   }
 });
