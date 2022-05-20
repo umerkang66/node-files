@@ -22,6 +22,7 @@ class CustomPage {
     return new Proxy(customPage, {
       get: function (target, property) {
         // "target" is also customPage
+        // this will return an object, that if property doesn't exist on customPage, it will check on page, if it doesn't exist on page, it will check on browser
         return customPage[property] || page[property] || browser[property];
       },
     });
