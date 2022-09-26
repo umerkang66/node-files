@@ -21,8 +21,10 @@ const dataJson = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
 const dataObj = JSON.parse(dataJson);
 
 const server = http.createServer((req, res) => {
-  // prettier-ignore
-  const { query: { id }, pathname } = url.parse(req.url, true);
+  const {
+    query: { id },
+    pathname,
+  } = url.parse(req.url, true);
 
   // OVERVIEW PAGE
   if (pathname === '/' || pathname === '/overview') {
