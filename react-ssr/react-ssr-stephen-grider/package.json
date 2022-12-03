@@ -44,7 +44,7 @@
     "webpack-node-externals": "1.6.0"
   },
   "//": [
-    "react-router-dem: '4.2.2'",
+    "react-router-dom: '4.2.2'",
     "react-router-config: '1.0.0-beta.4'"
   ]
 }
