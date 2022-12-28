@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { gql, useMutation } from '@apollo/client';
 import { useNavigate, Link } from 'react-router-dom';
 
+import { fetchSongs } from '../queries';
+
 const SongCreate = () => {
   const navigate = useNavigate();
 
@@ -11,7 +13,11 @@ const SongCreate = () => {
   const createSongHandler = async e => {
     e.preventDefault();
     // this title is "$title"
-    await createSong({ variables: { title: songTitle } });
+    await createSong({
+      variables: { title: songTitle },
+      // after running this mutation, update these queries
+      refetchQueries: [{ query: fetchSongs }],
+    });
 
     navigate('/');
   };
