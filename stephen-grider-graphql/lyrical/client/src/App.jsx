@@ -7,6 +7,7 @@ import {
 
 import SongList from './components/SongList';
 import SongCreate from './components/SongCreate';
+import SongDetail from './components/SongDetail';
 
 function App() {
   const router = createBrowserRouter(
@@ -14,6 +15,7 @@ function App() {
       <>
         <Route path="/" element={<SongList />} />
         <Route path="/songs/new" element={<SongCreate />} />
+        <Route path="/songs/:songId" element={<SongDetail />} />
       </>
     )
   );

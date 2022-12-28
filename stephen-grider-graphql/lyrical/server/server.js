@@ -2,7 +2,7 @@ const express = require('express');
 const { graphqlHTTP } = require('express-graphql');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config({ path: '.env.dev' });
+require('dotenv').config({ path: 'conf.env' });
 
 require('./models');
 const schema = require('./schema/schema');
