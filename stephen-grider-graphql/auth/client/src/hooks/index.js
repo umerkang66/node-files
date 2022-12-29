@@ -4,28 +4,28 @@ import { useNavigate } from 'react-router-dom';
 import { currentUserQuery } from '../queries';
 
 export const useAfterAuth = () => {
-  const { data: currentUserData } = useQuery(currentUserQuery);
+  const { data: currentUserData, loading } = useQuery(currentUserQuery);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (currentUserData && currentUserData.currentUser) {
+    if (!loading && currentUserData.currentUser) {
       navigate('/dashboard');
     }
-  }, [currentUserData]);
+  }, [currentUserData, loading]);
 };
 
 // first time page load, even currentUserData is undefined, after fetching and not logged in, currentUserData.currentUser is null
 export const useRequireAuth = () => {
-  const { data: currentUserData } = useQuery(currentUserQuery);
+  const { data: currentUserData, loading } = useQuery(currentUserQuery);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (currentUserData && !currentUserData.currentUser) {
+    if (!loading && !currentUserData.currentUser) {
       navigate('/signin');
     }
-  }, [currentUserData]);
+  }, [currentUserData, loading]);
 
   return currentUserData;
 };
