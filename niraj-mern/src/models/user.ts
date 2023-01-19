@@ -8,6 +8,7 @@ interface UserAttrs {
   password: string;
 }
 
+// This type will be returned to the frontend
 type UserSerialized = Omit<UserAttrs, 'password'> & {
   // these are actually 'dates'
   createdAt: string;

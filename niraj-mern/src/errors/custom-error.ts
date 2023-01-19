@@ -2,9 +2,9 @@ interface ICustomError {
   message: string;
   field?: string;
 }
-export type CustomErrorArr = ICustomError[];
+type CustomErrorArr = ICustomError[];
 
-export abstract class CustomError extends Error {
+abstract class CustomError extends Error {
   public abstract statusCode: number;
   // always return object that contains errors, that is a array of message, or field property
   public abstract serializeErrors(): CustomErrorArr;
@@ -15,3 +15,5 @@ export abstract class CustomError extends Error {
     Object.setPrototypeOf(this, CustomError.prototype);
   }
 }
+
+export { CustomError, type CustomErrorArr };

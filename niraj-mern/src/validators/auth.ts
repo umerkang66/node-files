@@ -13,4 +13,16 @@ const signupValidator = [
     .withMessage('PasswordConfirm must be between 8 an 30 characters'),
 ];
 
-export { signupValidator };
+const signinValidator = [
+  body('email')
+    .isEmail()
+    .withMessage('The email that you have provided must be valid'),
+  body('password')
+    .trim()
+    .notEmpty()
+    .withMessage('You must provide a password')
+    .isLength({ min: 8, max: 30 })
+    .withMessage('Your password length should be between 8 and 30'),
+];
+
+export { signupValidator, signinValidator };
