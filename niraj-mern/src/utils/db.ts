@@ -6,6 +6,8 @@ async function connectToDb() {
     throw new Error('DB Url is not defined');
   }
 
+  mongoose.set('strictQuery', false);
+
   try {
     await mongoose.connect(dbUrl);
     console.log('🚀', 'Connected to db');
