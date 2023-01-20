@@ -1,8 +1,8 @@
 import { body } from 'express-validator';
 
 const signupValidator = [
-  body('name').notEmpty().withMessage('Name must be provided.'),
-  body('email').isEmail().withMessage('Email provided must be valid.'),
+  body('name').notEmpty().withMessage('Name must be provided'),
+  body('email').isEmail().withMessage('Email provided must be valid'),
   body('password')
     .trim()
     .isLength({ min: 8, max: 30 })

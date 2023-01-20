@@ -4,6 +4,7 @@ import { BadRequestError } from '../errors/bad-request-error';
 import { createSendToken } from '../services/create-send-token';
 import { Password } from '../services/password';
 
+// express validator runs before it, so these values must be present
 interface SignupReqBody {
   name: string;
   email: string;
@@ -26,6 +27,7 @@ const signup = catchAsync<SignupReqBody>(async (req, res) => {
   createSendToken(user, 201, req, res);
 });
 
+// express validator runs before it, so these values must be present
 interface SigninReqBody {
   email: string;
   password: string;
