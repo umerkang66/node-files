@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import * as authControllers from '../controllers/auth';
 import { validateRequest } from '../middlewares/validate-request';
-import { signinValidator, signupValidator } from '../validators/auth';
+import {
+  signinValidator,
+  signupValidator,
+  verifyEmailValidator,
+} from '../validators/auth';
 
 const router = Router();
 
@@ -10,6 +14,13 @@ router.post(
   signupValidator,
   validateRequest,
   authControllers.signup
+);
+
+router.post(
+  '/confirm-signup',
+  verifyEmailValidator,
+  validateRequest,
+  authControllers.confirmSignup
 );
 
 router.post(

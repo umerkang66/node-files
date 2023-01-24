@@ -1,4 +1,5 @@
 import { body } from 'express-validator';
+import { isValidObjectId } from 'mongoose';
 
 const signupValidator = [
   body('name').notEmpty().withMessage('Name must be provided'),
@@ -13,6 +14,15 @@ const signupValidator = [
     .withMessage('PasswordConfirm must be between 8 an 30 characters'),
 ];
 
+const verifyEmailValidator = [
+  body('userId')
+    .notEmpty()
+    .withMessage('userId must be provided')
+    .custom(userId => isValidObjectId(userId))
+    .withMessage('Invalid userId'),
+  body('token').notEmpty().withMessage('Token must be provided'),
+];
+
 const signinValidator = [
   body('email')
     .isEmail()
@@ -25,4 +35,4 @@ const signinValidator = [
     .withMessage('Your password length should be between 8 and 30'),
 ];
 
-export { signupValidator, signinValidator };
+export { signupValidator, verifyEmailValidator, signinValidator };

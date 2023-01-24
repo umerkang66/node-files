@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
 import { Password } from '../services/password';
+import {
+  EmailVerifyToken,
+  EmailVerifyTokenDocument,
+} from './email-verify-token';
 
 // interface to describe the properties that are required to create user
 interface UserAttrs {
@@ -13,15 +17,26 @@ type UserSerialized = Omit<UserAttrs, 'password'> & {
   // these are actually 'dates'
   createdAt: string;
   updatedAt: string;
+  isVerified: boolean;
 };
 
 // interface that describes the properties that user document has
-export type UserDocument = mongoose.Document & UserAttrs;
+interface UserDocument extends mongoose.Document {
+  name: string;
+  email: string;
+  password: string;
+  createdAt: string;
+  updatedAt: string;
+  isVerified: boolean;
+  addEmailVerifyToken: (token: string) => Promise<void>;
+  checkEmailVerifyToken: (
+    token: string
+  ) => Promise<EmailVerifyTokenDocument | null>;
+}
 
-type BuildFn = (attrs: UserAttrs) => UserDocument;
 // interface that describes the properties that a user model has
 interface UserModel extends mongoose.Model<UserDocument> {
-  build: BuildFn;
+  build: (attrs: UserAttrs) => UserDocument;
 }
 
 const userSchema = new mongoose.Schema(
@@ -29,6 +44,7 @@ const userSchema = new mongoose.Schema(
     name: { type: String, trim: true, required: true },
     email: { type: String, trim: true, required: true, unique: true },
     password: { type: String, required: true },
+    isVerified: { type: Boolean, required: true, default: false },
   },
   {
     timestamps: true,
@@ -54,12 +70,31 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-userSchema.statics.build = function (attrs: UserAttrs) {
+userSchema.statics.build = function (attrs: UserAttrs): UserDocument {
   // here this is userModel
   // after building this document in the model, it should be saved()
   return new User(attrs);
 };
 
+userSchema.methods.addEmailVerifyToken = async function (
+  this: UserDocument,
+  token: string
+): Promise<void> {
+  await EmailVerifyToken.build({ token, owner: this.id }).save();
+};
+
+userSchema.methods.checkEmailVerifyToken = async function (
+  this: UserDocument,
+  token: string
+): Promise<EmailVerifyTokenDocument | null> {
+  const foundToken = await EmailVerifyToken.findOne({
+    token: Password.hashToken(token),
+    owner: this.id,
+  });
+
+  return foundToken;
+};
+
 const User = mongoose.model<UserDocument, UserModel>('User', userSchema);
 
-export { User, type UserSerialized };
+export { User, type UserSerialized, type UserDocument };

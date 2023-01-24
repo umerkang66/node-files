@@ -17,6 +17,10 @@ async function start() {
   if (!process.env.DB_URL) {
     throw new Error('DB_URL is not defined');
   }
+  if (!process.env.MAILTRAP_USER || !process.env.MAILTRAP_PASS) {
+    throw new Error('MAILTRAP credentials are not defined');
+  }
+
   await connectToDb();
 
   const port = process.env.PORT || 3001;
