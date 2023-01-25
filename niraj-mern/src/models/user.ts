@@ -61,6 +61,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+// MIDDLEWARES
 userSchema.pre('save', async function (next) {
   // here 'this' is document
   if (this.isModified('password')) {
@@ -70,12 +71,26 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+userSchema.pre('save', function (next) {
+  // here 'this'==='userDocument'
+  if (this.isModified('isVerified') && this.isVerified === true) {
+    // if user is 'verified', then delete the token
+    // don't need to await it, because user doesn't need to know if their token is deleted or not,
+    // if we are not awaiting it, we have to run the query through exec()
+    EmailVerifyToken.findOneAndRemove({ owner: this.id }).exec();
+  }
+
+  next();
+});
+
+// STATIC METHODS
 userSchema.statics.build = function (attrs: UserAttrs): UserDocument {
   // here this is userModel
   // after building this document in the model, it should be saved()
   return new User(attrs);
 };
 
+// DOCUMENT METHODS
 userSchema.methods.addEmailVerifyToken = async function (
   this: UserDocument,
   token: string
@@ -95,6 +110,7 @@ userSchema.methods.checkEmailVerifyToken = async function (
   return foundToken;
 };
 
+// MODEL
 const User = mongoose.model<UserDocument, UserModel>('User', userSchema);
 
 export { User, type UserSerialized, type UserDocument };

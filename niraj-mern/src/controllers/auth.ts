@@ -26,7 +26,7 @@ const signup = catchAsync<SignupReqBody>(async (req, res) => {
   await user.save();
 
   // we don't need to the token expires property here, because that is already handled by mongoose
-  const { token } = Password.createToken(5);
+  const token = Password.createToken(5);
   await user.addEmailVerifyToken(token);
 
   await sendEmailVerificationMail(token, user.email);

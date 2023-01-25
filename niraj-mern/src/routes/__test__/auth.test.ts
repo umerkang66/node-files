@@ -1,5 +1,11 @@
 import request from 'supertest';
 import { app } from '../../app';
+import { mailer } from '../../emails/mailer';
+import { User } from '../../models/user';
+import { Password } from '../../services/password';
+
+// in the same directory there should be __mocks__/mailer.ts
+jest.mock('../../emails/mailer');
 
 beforeAll(() => {
   process.env.JWT_KEY = 'asdf';
@@ -35,7 +41,7 @@ describe('Signup', () => {
     await request(app).post('/api/auth/signup').send(body).expect(400);
   });
 
-  it('sets a cookie after successful signup', async () => {
+  it('sends the otp token email after successful signup', async () => {
     const body = {
       name: 'first_name',
       email: 'test@test.com',
@@ -43,12 +49,42 @@ describe('Signup', () => {
       passwordConfirm: 'password',
     };
 
+    await request(app).post('/api/auth/signup').send(body).expect(201);
+
+    expect(mailer.sendMail).toHaveBeenCalled();
+  });
+});
+
+describe('Confirm Signup', () => {
+  it('returns and error if invalid userId is provided', async () => {
     const res = await request(app)
-      .post('/api/auth/signup')
+      .post('/api/auth/confirm-signup')
+      .send({ token: 'random_token', userId: 'random_userId' })
+      .expect(400);
+  });
+
+  it('Signs up the user after token is provided', async () => {
+    // First create the user
+    const user = await User.build({
+      name: 'first',
+      email: 't@t.com',
+      password: 'password',
+    }).save();
+
+    const userId = user.id;
+    const token = Password.createToken(5);
+
+    await user.addEmailVerifyToken(token);
+
+    const body = { userId, token };
+    const res = await request(app)
+      .post('/api/auth/confirm-signup')
       .send(body)
       .expect(201);
 
     expect(res.get('Set-Cookie')).toBeDefined();
+    // After verifying the user, isVerified should be true
+    expect(res.body.isVerified).toBe(true);
   });
 });
 

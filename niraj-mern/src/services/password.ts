@@ -14,10 +14,10 @@ export class Password {
     return bcrypt.compare(password, userPassword);
   }
 
-  public static createToken(numOfBytes: number = 32): { token: string } {
+  public static createToken(numOfBytes: number = 32): string {
     const token = crypto.randomBytes(numOfBytes).toString('hex');
 
-    return { token };
+    return token;
   }
 
   public static hashToken(token: string): string {
