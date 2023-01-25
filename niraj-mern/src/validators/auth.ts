@@ -14,6 +14,14 @@ const signupValidator = [
     .withMessage('PasswordConfirm must be between 8 an 30 characters'),
 ];
 
+const resendEmailVerifyTokenValidator = [
+  body('userId')
+    .notEmpty()
+    .withMessage('userId must be provided')
+    .custom(userId => isValidObjectId(userId))
+    .withMessage('Invalid userId'),
+];
+
 const verifyEmailValidator = [
   body('userId')
     .notEmpty()
@@ -35,4 +43,9 @@ const signinValidator = [
     .withMessage('Your password length should be between 8 and 30'),
 ];
 
-export { signupValidator, verifyEmailValidator, signinValidator };
+export {
+  signupValidator,
+  resendEmailVerifyTokenValidator,
+  verifyEmailValidator,
+  signinValidator,
+};

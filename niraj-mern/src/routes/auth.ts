@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as authControllers from '../controllers/auth';
 import { validateRequest } from '../middlewares/validate-request';
 import {
+  resendEmailVerifyTokenValidator,
   signinValidator,
   signupValidator,
   verifyEmailValidator,
@@ -14,6 +15,13 @@ router.post(
   signupValidator,
   validateRequest,
   authControllers.signup
+);
+
+router.post(
+  '/resend-email-verify-token',
+  resendEmailVerifyTokenValidator,
+  validateRequest,
+  authControllers.resendEmailVerifyToken
 );
 
 router.post(

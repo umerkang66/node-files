@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { app } from '../../app';
 import { mailer } from '../../emails/mailer';
-import { User } from '../../models/user';
+import { User, type UserDocument } from '../../models/user';
 import { Password } from '../../services/password';
 
 // in the same directory there should be __mocks__/mailer.ts
@@ -55,9 +55,41 @@ describe('Signup', () => {
   });
 });
 
+describe('Resend Email Verification Token', () => {
+  let user: UserDocument;
+
+  beforeEach(async () => {
+    // Create the user
+    user = await User.build({
+      name: 'first',
+      email: 't@t.com',
+      password: 'password',
+    }).save();
+  });
+
+  it('returns 400, if token already exists', async () => {
+    const token = Password.createToken(5);
+    await user.addEmailVerifyToken(token);
+
+    await request(app)
+      .post('/api/auth/resend-email-verify-token')
+      .send({ userId: user.id })
+      .expect(400);
+  });
+
+  it('sends the token to email', async () => {
+    await request(app)
+      .post('/api/auth/resend-email-verify-token')
+      .send({ userId: user.id })
+      .expect(200);
+
+    expect(mailer.sendMail).toHaveBeenCalled();
+  });
+});
+
 describe('Confirm Signup', () => {
   it('returns and error if invalid userId is provided', async () => {
-    const res = await request(app)
+    await request(app)
       .post('/api/auth/confirm-signup')
       .send({ token: 'random_token', userId: 'random_userId' })
       .expect(400);
@@ -121,7 +153,7 @@ describe('SignIn', () => {
     await request(app)
       .post('/api/auth/signin')
       .send({ email: 'test@test.com', password: 'password' })
-      .expect(400);
+      .expect(404);
   });
 
   it('fails when an incorrect password is supplied', async () => {
