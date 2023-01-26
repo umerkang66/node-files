@@ -3,7 +3,11 @@ import { Password } from '../services/password';
 import {
   EmailVerifyToken,
   EmailVerifyTokenDocument,
-} from './email-verify-token';
+} from './tokens/email-verify-token';
+import {
+  ResetPasswordToken,
+  ResetPasswordTokenDocument,
+} from './tokens/reset-password-token';
 
 // interface to describe the properties that are required to create user
 interface UserAttrs {
@@ -32,6 +36,10 @@ interface UserDocument extends mongoose.Document {
   checkEmailVerifyToken: (
     token: string
   ) => Promise<EmailVerifyTokenDocument | null>;
+  addResetPasswordToken: (token: string) => Promise<void>;
+  checkResetPasswordToken: (
+    token: string
+  ) => Promise<ResetPasswordTokenDocument | null>;
 }
 
 // interface that describes the properties that a user model has
@@ -71,18 +79,6 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-userSchema.pre('save', function (next) {
-  // here 'this'==='userDocument'
-  if (this.isModified('isVerified') && this.isVerified === true) {
-    // if user is 'verified', then delete the token
-    // don't need to await it, because user doesn't need to know if their token is deleted or not,
-    // if we are not awaiting it, we have to run the query through exec()
-    EmailVerifyToken.findOneAndRemove({ owner: this.id }).exec();
-  }
-
-  next();
-});
-
 // STATIC METHODS
 userSchema.statics.build = function (attrs: UserAttrs): UserDocument {
   // here this is userModel
@@ -105,6 +101,25 @@ userSchema.methods.checkEmailVerifyToken = async function (
   const foundToken = await EmailVerifyToken.findOne({
     token: Password.hashToken(token),
     owner: this.id,
+  });
+
+  return foundToken;
+};
+
+userSchema.methods.addResetPasswordToken = async function (
+  this: UserDocument,
+  token: string
+): Promise<void> {
+  await ResetPasswordToken.build({ owner: this.id, token }).save();
+};
+
+userSchema.methods.checkResetPasswordToken = async function (
+  this: UserDocument,
+  token: string
+): Promise<ResetPasswordTokenDocument | null> {
+  const foundToken = await ResetPasswordToken.findOne({
+    owner: this.id,
+    token: Password.hashToken(token),
   });
 
   return foundToken;

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Password } from '../services/password';
+import { Password } from '../../services/password';
 
 interface EmailVerifyTokenAttrs {
   owner: string | mongoose.ObjectId;

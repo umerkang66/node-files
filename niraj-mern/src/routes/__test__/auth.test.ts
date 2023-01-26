@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { app } from '../../app';
 import { mailer } from '../../emails/mailer';
+import { EmailVerifyToken } from '../../models/tokens/email-verify-token';
 import { User, type UserDocument } from '../../models/user';
 import { Password } from '../../services/password';
 
@@ -117,6 +118,13 @@ describe('Confirm Signup', () => {
     expect(res.get('Set-Cookie')).toBeDefined();
     // After verifying the user, isVerified should be true
     expect(res.body.isVerified).toBe(true);
+
+    // Token should be deleted after signing up
+    const foundToken = await EmailVerifyToken.findOne({
+      token: Password.hashToken(token),
+    });
+
+    expect(foundToken).toBeNull();
   });
 });
 

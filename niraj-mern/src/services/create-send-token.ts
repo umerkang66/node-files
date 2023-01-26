@@ -14,8 +14,19 @@ export const createSendToken = (
   user: UserDocument,
   statusCode: number,
   req: Request,
-  res: Response
+  res: Response,
+  nonVerifiedUserMessage?: string
 ) => {
+  if (!user.isVerified) {
+    const responseToSend: { userId: string; message?: string } = {
+      userId: user.id,
+    };
+
+    if (nonVerifiedUserMessage) responseToSend.message = nonVerifiedUserMessage;
+
+    return res.status(statusCode).send(responseToSend);
+  }
+
   const token = signToken(user.id);
   const expiresIn =
     // this cookie_expires_in is in days, convert it into milliseconds
