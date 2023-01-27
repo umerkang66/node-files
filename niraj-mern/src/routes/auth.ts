@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import * as authControllers from '../controllers/auth';
+import { currentUser } from '../middlewares/current-user';
+import { requireAuth } from '../middlewares/require-auth';
 import { validateRequest } from '../middlewares/validate-request';
 import {
   forgotPasswordValidator,
@@ -7,6 +9,7 @@ import {
   resetPasswordValidator,
   signinValidator,
   signupValidator,
+  updatePasswordValidator,
   verifyEmailValidator,
 } from '../validators/auth';
 
@@ -38,6 +41,15 @@ router.post(
   signinValidator,
   validateRequest,
   authControllers.signin
+);
+
+router.post(
+  '/update-password',
+  updatePasswordValidator,
+  validateRequest,
+  currentUser,
+  requireAuth,
+  authControllers.updatePassword
 );
 
 router.post(

@@ -19,8 +19,8 @@ interface UserAttrs {
 // This type will be returned to the frontend
 type UserSerialized = Omit<UserAttrs, 'password'> & {
   // these are actually 'dates'
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | number | Date;
+  updatedAt: string | number | Date;
   isVerified: boolean;
 };
 
@@ -29,9 +29,10 @@ interface UserDocument extends mongoose.Document {
   name: string;
   email: string;
   password: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | number | Date;
+  updatedAt: string | number | Date;
   isVerified: boolean;
+  passwordChangedAt: string | number | Date;
   addEmailVerifyToken: () => Promise<string>;
   checkEmailVerifyToken: (
     token: string
@@ -41,6 +42,7 @@ interface UserDocument extends mongoose.Document {
     token: string
   ) => Promise<ResetPasswordTokenDocument | null>;
   validatePassword: (candidatePassword: string) => Promise<boolean>;
+  changedPasswordAfter: (jwtIssuedAt: number) => boolean;
 }
 
 // interface that describes the properties that a user model has
@@ -54,6 +56,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, trim: true, required: true, unique: true },
     password: { type: String, required: true },
     isVerified: { type: Boolean, required: true, default: false },
+    passwordChangedAt: { type: Date },
   },
   {
     timestamps: true,
@@ -65,6 +68,7 @@ const userSchema = new mongoose.Schema(
         delete ret._id;
         delete ret.__v;
         delete ret.password;
+        delete ret.passwordChangedAt;
       },
     },
   }
@@ -77,6 +81,19 @@ userSchema.pre('save', async function (next) {
     const hashed = await Password.toHash(this.get('password'));
     this.set('password', hashed);
   }
+  next();
+});
+
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password') || this.isNew) {
+    // if the password is not modified
+    // or if the password is modified, but the document is new, it is created first time
+    // don't do anything
+    return next();
+  }
+
+  this.passwordChangedAt = new Date(Date.now() - 1000);
+
   next();
 });
 
@@ -93,6 +110,25 @@ userSchema.methods.validatePassword = async function (
   candidatePassword: string
 ) {
   return await Password.compare(candidatePassword, this.password);
+};
+
+userSchema.methods.changedPasswordAfter = function (
+  jwtIssuedAt: number
+): boolean {
+  // jwtIssuedAt is in seconds
+  // here "this" is document
+  if (this.passwordChangedAt) {
+    // it means password has been changed, now we have to check, if password is changed after the jwt issued at, then passwordChangedAt will be greater than jwtTime, and return true.
+
+    // converting milliseconds into seconds
+    const changedTimestamp = parseInt(
+      String(this.passwordChangedAt.getTime() / 1000),
+      10
+    );
+
+    return changedTimestamp >= jwtIssuedAt;
+  }
+  return false;
 };
 
 userSchema.methods.addEmailVerifyToken = async function (

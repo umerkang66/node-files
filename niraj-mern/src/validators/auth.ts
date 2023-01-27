@@ -43,6 +43,27 @@ const signinValidator = [
     .withMessage('Your password length should be between 8 and 30'),
 ];
 
+const updatePasswordValidator = [
+  body('currentPassword')
+    .trim()
+    .notEmpty()
+    .withMessage('You must provide a password')
+    .isLength({ min: 8, max: 30 })
+    .withMessage('Your password length should be between 8 and 30'),
+  body('password')
+    .trim()
+    .notEmpty()
+    .withMessage('You must provide a password')
+    .isLength({ min: 8, max: 30 })
+    .withMessage('Your password length should be between 8 and 30'),
+  body('passwordConfirm')
+    .trim()
+    .notEmpty()
+    .withMessage('You must provide a password')
+    .isLength({ min: 8, max: 30 })
+    .withMessage('Your password length should be between 8 and 30'),
+];
+
 const forgotPasswordValidator = [
   body('email')
     .isEmail()
@@ -71,6 +92,7 @@ export {
   resendEmailVerifyTokenValidator,
   verifyEmailValidator,
   signinValidator,
+  updatePasswordValidator,
   forgotPasswordValidator,
   resetPasswordValidator,
 };

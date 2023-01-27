@@ -112,6 +112,33 @@ const signin = catchAsync<{ email: string; password: string }>(
   }
 );
 
+// currentUser and requireAuth runs before this
+const updatePassword = catchAsync<{
+  currentPassword: string;
+  password: string;
+  passwordConfirm: string;
+}>(async (req, res) => {
+  const user = req.currentUser!;
+  const { currentPassword } = req.body;
+
+  const correctPassword = await user.validatePassword(currentPassword);
+
+  if (!correctPassword) {
+    throw new BadRequestError('Current password is not correct');
+  }
+
+  const { password, passwordConfirm } = req.body;
+
+  if (password !== passwordConfirm) {
+    throw new BadRequestError('Password and PasswordConfirm are not equal');
+  }
+
+  user.password = password;
+  await user.save();
+
+  createSendToken(user, 200, req, res);
+});
+
 const forgotPassword = catchAsync<{ email: string }>(async (req, res) => {
   const { email } = req.body;
 
@@ -142,6 +169,7 @@ const forgotPassword = catchAsync<{ email: string }>(async (req, res) => {
   });
 });
 
+// first are req.body params, third are req.query params
 const resetPassword = catchAsync<
   { password: string; passwordConfirm: string },
   any,
@@ -179,6 +207,7 @@ export {
   resendEmailVerifyToken,
   confirmSignup,
   signin,
+  updatePassword,
   forgotPassword,
   resetPassword,
 };

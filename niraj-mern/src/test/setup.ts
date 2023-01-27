@@ -2,8 +2,20 @@ jest.setTimeout(100000);
 
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
+import { User } from '../models/user';
 
 let mongo: MongoMemoryServer;
+
+declare global {
+  var getAuthCookie: () => Promise<{
+    name: string;
+    email: string;
+    password: string;
+    id: string;
+    cookie: string;
+  }>;
+}
 
 beforeAll(async () => {
   mongo = await MongoMemoryServer.create();
@@ -26,3 +38,19 @@ afterAll(async () => {
   await mongoose.connection.close();
   await mongo.stop();
 });
+
+global.getAuthCookie = async () => {
+  const name = 'first';
+  const email = 'test@test.com';
+  const password = 'password';
+
+  const user = User.build({ name, email, password });
+  user.isVerified = true;
+  await user.save();
+
+  const token = jwt.sign({ id: user.id }, process.env.JWT_KEY!);
+
+  const cookie = `jwt=${token}`;
+
+  return { name, email, password, id: user.id, cookie };
+};

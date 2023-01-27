@@ -200,6 +200,49 @@ describe('SignIn', () => {
   });
 });
 
+describe('Update Password', () => {
+  it('returns 401, when user is not authenticated', async () => {
+    // Create the user, but don't send the cookie
+    const { password } = await getAuthCookie();
+
+    const newPass = 'new_password';
+
+    await request(app)
+      .post('/api/auth/update-password')
+      .send({
+        currentPassword: password,
+        password: newPass,
+        passwordConfirm: newPass,
+      })
+      .expect(401);
+  });
+
+  it('Updates the password, if user is logged in', async () => {
+    // Create the user and cookie
+    const { email, password, cookie } = await getAuthCookie();
+
+    const newPass = 'new_password';
+
+    await request(app)
+      .post('/api/auth/update-password')
+      .set('Cookie', cookie)
+      .send({
+        currentPassword: password,
+        password: newPass,
+        passwordConfirm: newPass,
+      })
+      .expect(200);
+
+    // It should signin with the new password
+    const res = await request(app)
+      .post('/api/auth/signin')
+      .send({ email, password: newPass })
+      .expect(200);
+
+    expect(res.get('Set-Cookie')).toBeDefined();
+  });
+});
+
 describe('Forgot and Reset Password', () => {
   let user: UserDocument;
 
@@ -226,7 +269,7 @@ describe('Forgot and Reset Password', () => {
     expect(mailer.sendMail).toHaveBeenCalled();
   });
 
-  it.only('changes the password of user after token is provided', async () => {
+  it('changes the password of user after token is provided', async () => {
     // Create the token
     const token = await user.addResetPasswordToken();
     const url = `/api/auth/reset-password?token=${token}&userId=${user.id}`;
