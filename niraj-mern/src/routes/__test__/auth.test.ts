@@ -2,6 +2,7 @@ import request from 'supertest';
 import { app } from '../../app';
 import { mailer } from '../../emails/mailer';
 import { EmailVerifyToken } from '../../models/tokens/email-verify-token';
+import { ResetPasswordToken } from '../../models/tokens/reset-password-token';
 import { User, type UserDocument } from '../../models/user';
 import { Password } from '../../services/password';
 
@@ -69,8 +70,7 @@ describe('Resend Email Verification Token', () => {
   });
 
   it('returns 400, if token already exists', async () => {
-    const token = Password.createToken(5);
-    await user.addEmailVerifyToken(token);
+    await user.addEmailVerifyToken();
 
     await request(app)
       .post('/api/auth/resend-email-verify-token')
@@ -105,9 +105,7 @@ describe('Confirm Signup', () => {
     }).save();
 
     const userId = user.id;
-    const token = Password.createToken(5);
-
-    await user.addEmailVerifyToken(token);
+    const token = await user.addEmailVerifyToken();
 
     const body = { userId, token };
     const res = await request(app)
@@ -182,19 +180,72 @@ describe('SignIn', () => {
 
   it('responds with a cookie when given valid credentials', async () => {
     // first create the user
-    const body = {
+    const email = 'test@test.com';
+    const password = 'password';
+
+    const user = User.build({
       name: 'first_name',
-      email: 'test@test.com',
-      password: 'password',
-      passwordConfirm: 'password',
-    };
-    await request(app).post('/api/auth/signup').send(body).expect(201);
+      email,
+      password,
+    });
+    user.isVerified = true;
+    await user.save();
 
     const res = await request(app)
       .post('/api/auth/signin')
-      .send({ email: body.email, password: body.password })
+      .send({ email, password })
       .expect(200);
 
     expect(res.get('Set-Cookie')).toBeDefined();
+  });
+});
+
+describe('Forgot and Reset Password', () => {
+  let user: UserDocument;
+
+  beforeEach(async () => {
+    user = User.build({
+      name: 'first_name',
+      email: 'test@test.com',
+      password: 'password',
+    });
+    user.isVerified = true;
+    await user.save();
+  });
+
+  it('Sends the token to email, if user is found', async () => {
+    await request(app)
+      .post('/api/auth/forgot-password')
+      .send({ email: user.email })
+      .expect(200);
+
+    // token should be created with this owner
+    const foundToken = ResetPasswordToken.findOne({ owner: user.id });
+    expect(foundToken).toBeDefined();
+
+    expect(mailer.sendMail).toHaveBeenCalled();
+  });
+
+  it.only('changes the password of user after token is provided', async () => {
+    // Create the token
+    const token = await user.addResetPasswordToken();
+    const url = `/api/auth/reset-password?token=${token}&userId=${user.id}`;
+
+    const newPass = 'newPassword';
+    const res = await request(app)
+      .post(url)
+      .send({ password: newPass, passwordConfirm: newPass })
+      .expect(200);
+
+    // This also sets the cookie
+    expect(res.get('Set-Cookie')).toBeDefined();
+
+    // it should login with new password
+    const res2 = await request(app)
+      .post('/api/auth/signin')
+      .send({ email: user.email, password: newPass })
+      .expect(200);
+
+    expect(res2.get('Set-Cookie')).toBeDefined();
   });
 });

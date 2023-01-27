@@ -56,6 +56,14 @@ const resetPasswordValidator = [
     .custom(userId => isValidObjectId(userId))
     .withMessage('Invalid userId'),
   query('token').notEmpty().withMessage('Token query param must be provided'),
+  body('password')
+    .trim()
+    .isLength({ min: 8, max: 30 })
+    .withMessage('Password must be between 8 an 30 characters'),
+  body('passwordConfirm')
+    .trim()
+    .isLength({ min: 8, max: 30 })
+    .withMessage('PasswordConfirm must be between 8 an 30 characters'),
 ];
 
 export {

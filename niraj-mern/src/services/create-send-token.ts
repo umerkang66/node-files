@@ -18,8 +18,10 @@ export const createSendToken = (
   nonVerifiedUserMessage?: string
 ) => {
   if (!user.isVerified) {
-    const responseToSend: { userId: string; message?: string } = {
+    const responseToSend = {
       userId: user.id,
+      // default message
+      message: 'User is not verified',
     };
 
     if (nonVerifiedUserMessage) responseToSend.message = nonVerifiedUserMessage;

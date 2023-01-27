@@ -32,14 +32,15 @@ interface UserDocument extends mongoose.Document {
   createdAt: string;
   updatedAt: string;
   isVerified: boolean;
-  addEmailVerifyToken: (token: string) => Promise<void>;
+  addEmailVerifyToken: () => Promise<string>;
   checkEmailVerifyToken: (
     token: string
   ) => Promise<EmailVerifyTokenDocument | null>;
-  addResetPasswordToken: (token: string) => Promise<void>;
+  addResetPasswordToken: () => Promise<string>;
   checkResetPasswordToken: (
     token: string
   ) => Promise<ResetPasswordTokenDocument | null>;
+  validatePassword: (candidatePassword: string) => Promise<boolean>;
 }
 
 // interface that describes the properties that a user model has
@@ -87,11 +88,21 @@ userSchema.statics.build = function (attrs: UserAttrs): UserDocument {
 };
 
 // DOCUMENT METHODS
-userSchema.methods.addEmailVerifyToken = async function (
+userSchema.methods.validatePassword = async function (
   this: UserDocument,
-  token: string
-): Promise<void> {
+  candidatePassword: string
+) {
+  return await Password.compare(candidatePassword, this.password);
+};
+
+userSchema.methods.addEmailVerifyToken = async function (
+  this: UserDocument
+): Promise<string> {
+  const token = Password.createToken(6);
+
   await EmailVerifyToken.build({ token, owner: this.id }).save();
+
+  return token;
 };
 
 userSchema.methods.checkEmailVerifyToken = async function (
@@ -107,10 +118,13 @@ userSchema.methods.checkEmailVerifyToken = async function (
 };
 
 userSchema.methods.addResetPasswordToken = async function (
-  this: UserDocument,
-  token: string
-): Promise<void> {
+  this: UserDocument
+): Promise<string> {
+  const token = Password.createToken();
+
   await ResetPasswordToken.build({ owner: this.id, token }).save();
+
+  return token;
 };
 
 userSchema.methods.checkResetPasswordToken = async function (

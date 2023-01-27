@@ -1,6 +1,6 @@
 import type { ErrorRequestHandler } from 'express';
 import { CustomError, type CustomErrorArr } from '../errors/custom-error';
-import { handleMongooseErrors } from './error-helpers/handle-mongoose-errors';
+import { handleMongooseErrors, handleJWTErrors } from './error-helpers';
 
 interface ResponseError {
   errors: CustomErrorArr;
@@ -13,6 +13,7 @@ export const errorHandler: ErrorHandler = (err, req, res, next) => {
   // if 'err' doesn't fulfils the requirements of some mongoose error,
   // default 'err' will be returned, that is provided
   err = handleMongooseErrors(err);
+  err = handleJWTErrors(err);
 
   if (err instanceof CustomError) {
     return res.status(err.statusCode).send({ errors: err.serializeErrors() });

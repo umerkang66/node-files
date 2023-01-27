@@ -2,7 +2,6 @@ import { catchAsync } from '../utils/catch-async';
 import { User } from '../models/user';
 import { BadRequestError } from '../errors/bad-request-error';
 import { createSendToken } from '../services/create-send-token';
-import { Password } from '../services/password';
 import {
   sendEmailVerificationMail,
   sendResetPasswordTokenMail,
@@ -29,8 +28,7 @@ const signup = catchAsync<{
   const user = User.build({ name, email, password });
   await user.save();
 
-  const token = Password.createToken(5);
-  await user.addEmailVerifyToken(token);
+  const token = await user.addEmailVerifyToken();
 
   await sendEmailVerificationMail(token, user.email);
 
@@ -57,8 +55,7 @@ const resendEmailVerifyToken = catchAsync<{ userId: string }>(
       );
     }
 
-    const token = Password.createToken(5);
-    await user.addEmailVerifyToken(token);
+    const token = await user.addEmailVerifyToken();
     await sendEmailVerificationMail(token, user.email);
 
     // This will not send the cookie but the normal response
@@ -88,8 +85,8 @@ const confirmSignup = catchAsync<{ userId: string; token: string }>(
     user.isVerified = true;
     await user.save();
 
-    // Now remove the token, but don't await it
-    EmailVerifyToken.findByIdAndRemove(foundToken.id).exec();
+    // Now remove the token
+    await EmailVerifyToken.findByIdAndRemove(foundToken.id);
 
     createSendToken(user, 201, req, res);
   }
@@ -105,7 +102,7 @@ const signin = catchAsync<{ email: string; password: string }>(
       throw new NotFoundError('No user exists with this email');
     }
 
-    const correctPassword = await Password.compare(password, user.password);
+    const correctPassword = await user.validatePassword(password);
 
     if (!correctPassword) {
       throw new BadRequestError('Invalid credentials');
@@ -131,8 +128,7 @@ const forgotPassword = catchAsync<{ email: string }>(async (req, res) => {
   }
 
   // This token should be strong
-  const token = Password.createToken();
-  await user.addResetPasswordToken(token);
+  const token = await user.addResetPasswordToken();
 
   const host = req.get('host');
 
@@ -140,8 +136,10 @@ const forgotPassword = catchAsync<{ email: string }>(async (req, res) => {
 
   await sendResetPasswordTokenMail(resetPasswordUrl, user.email);
 
-  const resMsg = 'Check your email to reset the password';
-  createSendToken(user, 200, req, res, resMsg);
+  res.send({
+    userId: user.id,
+    message: 'Check your email to reset your password',
+  });
 });
 
 const resetPassword = catchAsync<
@@ -170,6 +168,8 @@ const resetPassword = catchAsync<
 
   user.password = password;
   await user.save();
+
+  await ResetPasswordToken.findByIdAndRemove(resetPasswordToken.id);
 
   createSendToken(user, 200, req, res);
 });
