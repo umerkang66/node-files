@@ -9,7 +9,7 @@ import { currentUser } from '../../middlewares/current-user';
 import { requireAuth } from '../../middlewares/require-auth';
 import { restrictTo } from '../../middlewares/restrict-to';
 import { validateRequest } from '../../middlewares/validate-request';
-import { withIdParam } from '../../validators/admin/users';
+import { updateUserValidator, withIdParam } from '../../validators/admin/users';
 
 const router = express.Router();
 
@@ -19,7 +19,7 @@ router.get('/', getAllUsers);
 
 router.get('/:id', withIdParam, validateRequest, getUser);
 
-router.patch('/:id', withIdParam, validateRequest, updateUser);
+router.patch('/:id', updateUserValidator, validateRequest, updateUser);
 
 router.delete('/:id', withIdParam, validateRequest, deleteUser);
 
