@@ -1,4 +1,4 @@
-import { body, query } from 'express-validator';
+import { body, param, query } from 'express-validator';
 import { isValidObjectId } from 'mongoose';
 
 const signupValidator = [
@@ -41,6 +41,10 @@ const signinValidator = [
     .withMessage('You must provide a password')
     .isLength({ min: 8, max: 30 })
     .withMessage('Your password length should be between 8 and 30'),
+];
+
+const updateMeValidator = [
+  body('name').notEmpty().withMessage('Name should not be empty').optional(),
 ];
 
 const updatePasswordValidator = [
@@ -87,12 +91,23 @@ const resetPasswordValidator = [
     .withMessage('PasswordConfirm must be between 8 an 30 characters'),
 ];
 
+const confirmAdminSignupValidator = [
+  param('userId')
+    .notEmpty()
+    .withMessage('userId query param must be provided')
+    .custom(userId => isValidObjectId(userId))
+    .withMessage('Invalid userId'),
+  query('token').notEmpty().withMessage('Token query param must be provided'),
+];
+
 export {
   signupValidator,
   resendEmailVerifyTokenValidator,
   verifyEmailValidator,
   signinValidator,
+  updateMeValidator,
   updatePasswordValidator,
   forgotPasswordValidator,
   resetPasswordValidator,
+  confirmAdminSignupValidator,
 };

@@ -3,12 +3,16 @@ import { User } from '../models/user';
 import { BadRequestError } from '../errors/bad-request-error';
 import { createSendToken } from '../services/create-send-token';
 import {
+  sendAdminVerifyTokenMail,
   sendEmailVerificationMail,
   sendResetPasswordTokenMail,
 } from '../emails';
 import { EmailVerifyToken } from '../models/tokens/email-verify-token';
 import { NotFoundError } from '../errors/not-found-error';
 import { ResetPasswordToken } from '../models/tokens/reset-password-token';
+import { RequestHandler } from 'express';
+import { filterReqBody } from '../utils/filter-req-body';
+import { AdminVerifyToken } from '../models/tokens/admin-verify-token';
 
 // express validator runs before it, so these values must be present
 const signup = catchAsync<{
@@ -112,6 +116,27 @@ const signin = catchAsync<{ email: string; password: string }>(
   }
 );
 
+// currentUser middleware runs before this
+const currentUser: RequestHandler = (req, res) => {
+  res.send({ currentUser: req.currentUser || null });
+};
+
+const updateMe = catchAsync(async (req, res) => {
+  // currently only name is allowed to be updated
+  const filteredBody = filterReqBody(req.body, 'name');
+
+  const updatedUser = await User.findByIdAndUpdate(
+    req.currentUser!.id,
+    filteredBody,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  res.send(updatedUser);
+});
+
 // currentUser and requireAuth runs before this
 const updatePassword = catchAsync<{
   currentPassword: string;
@@ -202,12 +227,83 @@ const resetPassword = catchAsync<
   createSendToken(user, 200, req, res);
 });
 
+// CurrentUser and requireAuth runs before this
+const signout: RequestHandler = (req, res) => {
+  res.cookie('jwt', 'logged_out', {
+    // expires in 10 minutes from current_time
+    expires: new Date(Date.now() + 10 * 1000),
+    // can only be modified from backend
+    httpOnly: true,
+  });
+
+  res.send({ message: 'Logged out' });
+};
+
+const deleteMe = catchAsync(async (req, res) => {
+  await User.findByIdAndDelete(req.currentUser!.id);
+  res.status(204).send(null);
+});
+
+const adminSignup = catchAsync<{
+  name: string;
+  email: string;
+  password: string;
+  passwordConfirm: string;
+}>(async (req, res) => {
+  const { name, email, password, passwordConfirm } = req.body;
+
+  if (password !== passwordConfirm) {
+    throw new BadRequestError('Password and Password confirm don not match');
+  }
+
+  const user = await User.build({ name, email, password }).save();
+
+  const token = await user.addAdminVerifyToken();
+
+  const host = req.get('host');
+  const signupUrl = `${req.protocol}://${host}/api/users/admin-signup/${user.id}?token=${token}`;
+
+  await sendAdminVerifyTokenMail(signupUrl, 'ugulzar4512@gmail.com');
+
+  res.send({ message: 'Token for signup has sent to your email' });
+});
+
+const confirmAdminSignup = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { token } = req.query;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new NotFoundError('User not found');
+  }
+
+  const foundToken = await user.checkAdminVerifyToken(token);
+  if (!foundToken) {
+    throw new BadRequestError('Token is invalid');
+  }
+
+  // Here user is already verified
+  user.isVerified = true;
+  user.role = 'admin';
+  await user.save();
+
+  await AdminVerifyToken.findByIdAndRemove(foundToken.id);
+
+  createSendToken(user, 200, req, res);
+});
+
 export {
   signup,
   resendEmailVerifyToken,
   confirmSignup,
   signin,
+  currentUser,
+  updateMe,
   updatePassword,
   forgotPassword,
   resetPassword,
+  signout,
+  deleteMe,
+  adminSignup,
+  confirmAdminSignup,
 };

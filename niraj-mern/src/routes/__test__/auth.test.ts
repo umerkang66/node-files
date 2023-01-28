@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { app } from '../../app';
 import { mailer } from '../../emails/mailer';
+import { AdminVerifyToken } from '../../models/tokens/admin-verify-token';
 import { EmailVerifyToken } from '../../models/tokens/email-verify-token';
 import { ResetPasswordToken } from '../../models/tokens/reset-password-token';
 import { User, type UserDocument } from '../../models/user';
@@ -200,6 +201,50 @@ describe('SignIn', () => {
   });
 });
 
+describe('Current User', () => {
+  it('responds with details about the currentuser, if user is logged in', async () => {
+    const { cookie, email } = await getAuthCookie();
+
+    const res = await request(app)
+      .get('/api/auth/currentuser')
+      .set('Cookie', cookie)
+      .send()
+      .expect(200);
+
+    expect(res.body.currentUser.email).toBe(email);
+  });
+
+  it('responds undefined if user is not logged in', async () => {
+    const res = await request(app).get('/api/auth/currentuser').send();
+
+    const { currentUser } = res.body;
+    expect(currentUser).toBeNull();
+  });
+});
+
+describe('Update Me', () => {
+  it('updates the user if correct properties are provided', async () => {
+    // create the user
+    const { cookie } = await getAuthCookie();
+
+    // update the user
+    await request(app)
+      .patch('/api/auth/update-me')
+      .set('Cookie', cookie)
+      .send({ name: 'second_name' })
+      .expect(200);
+
+    // get the user
+    const res = await request(app)
+      .get('/api/auth/currentuser')
+      .set('Cookie', cookie)
+      .send()
+      .expect(200);
+
+    expect(res.body.currentUser.name).toBe('second_name');
+  });
+});
+
 describe('Update Password', () => {
   it('returns 401, when user is not authenticated', async () => {
     // Create the user, but don't send the cookie
@@ -208,7 +253,7 @@ describe('Update Password', () => {
     const newPass = 'new_password';
 
     await request(app)
-      .post('/api/auth/update-password')
+      .patch('/api/auth/update-password')
       .send({
         currentPassword: password,
         password: newPass,
@@ -224,7 +269,7 @@ describe('Update Password', () => {
     const newPass = 'new_password';
 
     await request(app)
-      .post('/api/auth/update-password')
+      .patch('/api/auth/update-password')
       .set('Cookie', cookie)
       .send({
         currentPassword: password,
@@ -276,7 +321,7 @@ describe('Forgot and Reset Password', () => {
 
     const newPass = 'newPassword';
     const res = await request(app)
-      .post(url)
+      .patch(url)
       .send({ password: newPass, passwordConfirm: newPass })
       .expect(200);
 
@@ -290,5 +335,88 @@ describe('Forgot and Reset Password', () => {
       .expect(200);
 
     expect(res2.get('Set-Cookie')).toBeDefined();
+  });
+});
+
+describe('Sign out', () => {
+  it('clears the cookie after signing out', async () => {
+    const { cookie } = await getAuthCookie();
+
+    const res = await request(app)
+      .post('/api/auth/signout')
+      .set('Cookie', cookie)
+      .send({})
+      .expect(200);
+
+    // there should be a cookie with jwt in the cookies array, and that should contain cookieItem
+    res.get('Set-Cookie').forEach(cookieItem => {
+      expect(cookieItem).toContain('logged_out');
+    });
+  });
+});
+
+describe('Delete Me', () => {
+  it('deletes the currentuser', async () => {
+    const userInfo = await getAuthCookie();
+
+    await request(app)
+      .delete('/api/auth/delete-me')
+      .set('Cookie', userInfo.cookie)
+      .send()
+      .expect(204);
+
+    // Now the user cannot sign in
+    await request(app)
+      .post('/api/auth/signin')
+      .send({ email: userInfo.email, password: userInfo.password })
+      .expect(404);
+  });
+});
+
+describe('Signup admin with token', () => {
+  let user: UserDocument;
+  let token: string;
+
+  beforeEach(async () => {
+    user = await User.build({
+      name: 'firstname',
+      email: 'test@test.com',
+      password: 'password',
+    }).save();
+
+    token = await user.addAdminVerifyToken();
+  });
+
+  it('sets the role to "admin" if correct token is provided', async () => {
+    await request(app)
+      .patch(`/api/auth/admin-signup/${user.id}?token=${token}`)
+      .send()
+      .expect(200);
+
+    const updatedUser = await User.findById(user.id);
+    expect(updatedUser!.role).toBe('admin');
+  });
+
+  it('sets the cookie with updated user', async () => {
+    const res = await request(app)
+      .patch(`/api/auth/admin-signup/${user.id}?token=${token}`)
+      .send()
+      .expect(200);
+
+    expect(res.get('Set-Cookie')).toBeDefined();
+  });
+
+  it('removes the token, after updating', async () => {
+    await request(app)
+      .patch(`/api/auth/admin-signup/${user.id}?token=${token}`)
+      .send()
+      .expect(200);
+
+    const foundToken = await AdminVerifyToken.findOne({
+      owner: user.id,
+      token: Password.hashToken(token),
+    });
+
+    expect(foundToken).toBeNull();
   });
 });

@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 import { Password } from '../services/password';
 import {
+  AdminVerifyToken,
+  AdminVerifyTokenDocument,
+} from './tokens/admin-verify-token';
+import {
   EmailVerifyToken,
   EmailVerifyTokenDocument,
 } from './tokens/email-verify-token';
@@ -15,13 +19,14 @@ interface UserAttrs {
   email: string;
   password: string;
 }
-
+type Role = 'user' | 'admin';
 // This type will be returned to the frontend
 type UserSerialized = Omit<UserAttrs, 'password'> & {
   // these are actually 'dates'
   createdAt: string | number | Date;
   updatedAt: string | number | Date;
   isVerified: boolean;
+  role: Role;
 };
 
 // interface that describes the properties that user document has
@@ -32,6 +37,7 @@ interface UserDocument extends mongoose.Document {
   createdAt: string | number | Date;
   updatedAt: string | number | Date;
   isVerified: boolean;
+  role: Role;
   passwordChangedAt: string | number | Date;
   addEmailVerifyToken: () => Promise<string>;
   checkEmailVerifyToken: (
@@ -43,6 +49,10 @@ interface UserDocument extends mongoose.Document {
   ) => Promise<ResetPasswordTokenDocument | null>;
   validatePassword: (candidatePassword: string) => Promise<boolean>;
   changedPasswordAfter: (jwtIssuedAt: number) => boolean;
+  addAdminVerifyToken: () => Promise<string>;
+  checkAdminVerifyToken: (
+    token: string
+  ) => Promise<AdminVerifyTokenDocument | null>;
 }
 
 // interface that describes the properties that a user model has
@@ -56,6 +66,11 @@ const userSchema = new mongoose.Schema(
     email: { type: String, trim: true, required: true, unique: true },
     password: { type: String, required: true },
     isVerified: { type: Boolean, required: true, default: false },
+    role: {
+      type: String,
+      default: 'user',
+      enum: { values: ['user', 'admin'] },
+    },
     passwordChangedAt: { type: Date },
   },
   {
@@ -168,6 +183,31 @@ userSchema.methods.checkResetPasswordToken = async function (
   token: string
 ): Promise<ResetPasswordTokenDocument | null> {
   const foundToken = await ResetPasswordToken.findOne({
+    owner: this.id,
+    token: Password.hashToken(token),
+  });
+
+  return foundToken;
+};
+
+userSchema.methods.addAdminVerifyToken = async function (
+  this: UserDocument
+): Promise<string> {
+  const token = Password.createToken();
+
+  await AdminVerifyToken.build({
+    owner: this.id,
+    token,
+  }).save();
+
+  return token;
+};
+
+userSchema.methods.checkAdminVerifyToken = async function (
+  this: UserDocument,
+  token: string
+): Promise<AdminVerifyTokenDocument | null> {
+  const foundToken = await AdminVerifyToken.findOne({
     owner: this.id,
     token: Password.hashToken(token),
   });
