@@ -1,14 +1,9 @@
 import { User } from '../../models/user';
-import {
-  deleteOne,
-  getAll,
-  getOne,
-  updateOne,
-} from '../../utils/handle-factory';
+import * as factory from '../../utils/handle-factory';
 
-const deleteUser = deleteOne(User);
-const getAllUsers = getAll(User);
-const getUser = getOne(User);
-const updateUser = updateOne(User);
+const deleteUser = factory.deleteOne(User);
+const getAllUsers = factory.getAll(User);
+const getUser = factory.getOne(User);
+const updateUser = factory.updateOne(User);
 
 export { getAllUsers, getUser, updateUser, deleteUser };

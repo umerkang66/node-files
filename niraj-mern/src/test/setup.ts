@@ -15,9 +15,19 @@ declare global {
     id: string;
     cookie: string;
   }>;
+
+  var getAdminCookie: () => Promise<{
+    name: string;
+    email: string;
+    password: string;
+    id: string;
+    cookie: string;
+  }>;
 }
 
 beforeAll(async () => {
+  process.env.JWT_KEY = 'asdf';
+
   mongo = await MongoMemoryServer.create();
   const mongoUri = mongo.getUri();
 
@@ -46,6 +56,23 @@ global.getAuthCookie = async () => {
 
   const user = User.build({ name, email, password });
   user.isVerified = true;
+  await user.save();
+
+  const token = jwt.sign({ id: user.id }, process.env.JWT_KEY!);
+
+  const cookie = `jwt=${token}`;
+
+  return { name, email, password, id: user.id, cookie };
+};
+
+global.getAdminCookie = async () => {
+  const name = 'first';
+  const email = 'admin@admin.com';
+  const password = 'password';
+
+  const user = User.build({ name, email, password });
+  user.isVerified = true;
+  user.role = 'admin';
   await user.save();
 
   const token = jwt.sign({ id: user.id }, process.env.JWT_KEY!);

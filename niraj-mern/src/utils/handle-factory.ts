@@ -59,19 +59,15 @@ function updateOne<T extends Document>(Mod: IMod<T>) {
   return catchAsync(async (req, res) => {
     // you should have run the validators (express-validators), before passing
     // the req.body to
-    const updatedDocument = (await Mod.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    )) as T;
+    const updated = (await Mod.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    })) as T;
 
-    if (!updatedDocument) {
+    if (!updated) {
       throw new NotFoundError('Document with this id is not found');
     }
-    res.send(updatedDocument);
+    res.send(updated);
   });
 }
 

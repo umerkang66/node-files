@@ -15,12 +15,12 @@ const router = express.Router();
 
 router.use(currentUser, requireAuth, restrictTo('admin'));
 
-router.get('/', getAllUsers);
+router.route('/').get(getAllUsers);
 
-router.get('/:id', withIdParam, validateRequest, getUser);
-
-router.patch('/:id', updateUserValidator, validateRequest, updateUser);
-
-router.delete('/:id', withIdParam, validateRequest, deleteUser);
+router
+  .route('/:id')
+  .get(withIdParam, validateRequest, getUser)
+  .patch(updateUserValidator, validateRequest, updateUser)
+  .delete(withIdParam, validateRequest, deleteUser);
 
 export { router as adminUsersRouter };
