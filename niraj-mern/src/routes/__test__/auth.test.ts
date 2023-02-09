@@ -359,11 +359,13 @@ describe('Delete Me', () => {
   it('deletes the currentuser', async () => {
     const userInfo = await getAuthCookie();
 
-    await request(app)
+    const res = await request(app)
       .delete('/api/auth/delete-me')
       .set('Cookie', userInfo.cookie)
       .send()
       .expect(204);
+
+    expect(res.get('Set-Cookie')[0]).toContain('user_deleted');
 
     // Now the user cannot sign in
     await request(app)

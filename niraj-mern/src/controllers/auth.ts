@@ -10,7 +10,7 @@ import {
 import { EmailVerifyToken } from '../models/tokens/email-verify-token';
 import { NotFoundError } from '../errors/not-found-error';
 import { ResetPasswordToken } from '../models/tokens/reset-password-token';
-import { RequestHandler } from 'express';
+import { type RequestHandler } from 'express';
 import { filterReqBody } from '../utils/filter-req-body';
 import { AdminVerifyToken } from '../models/tokens/admin-verify-token';
 
@@ -90,7 +90,7 @@ const confirmSignup = catchAsync<{ userId: string; token: string }>(
     await user.save();
 
     // Now remove the token
-    await EmailVerifyToken.findByIdAndRemove(foundToken.id);
+    await EmailVerifyToken.findByIdAndDelete(foundToken.id);
 
     createSendToken(user, 201, req, res);
   }
@@ -222,7 +222,7 @@ const resetPassword = catchAsync<
   user.password = password;
   await user.save();
 
-  await ResetPasswordToken.findByIdAndRemove(resetPasswordToken.id);
+  await ResetPasswordToken.findByIdAndDelete(resetPasswordToken.id);
 
   createSendToken(user, 200, req, res);
 });
@@ -241,6 +241,15 @@ const signout: RequestHandler = (req, res) => {
 
 const deleteMe = catchAsync(async (req, res) => {
   await User.findByIdAndDelete(req.currentUser!.id);
+
+  // delete the user cookie
+  res.cookie('jwt', 'user_deleted', {
+    // expires in 10 minutes from current_time
+    expires: new Date(Date.now() + 10 * 1000),
+    // can only be modified from backend
+    httpOnly: true,
+  });
+
   res.status(204).send(null);
 });
 
@@ -268,16 +277,17 @@ const adminSignup = catchAsync<{
   res.send({ message: 'Token for signup has sent to your email' });
 });
 
-const confirmAdminSignup = catchAsync(async (req, res) => {
-  const { userId } = req.params;
-  const { token } = req.query;
-
-  const user = await User.findById(userId);
+const confirmAdminSignup = catchAsync<
+  any,
+  { userId: string },
+  { token: string }
+>(async (req, res) => {
+  const user = await User.findById(req.params.userId);
   if (!user) {
     throw new NotFoundError('User not found');
   }
 
-  const foundToken = await user.checkAdminVerifyToken(token);
+  const foundToken = await user.checkAdminVerifyToken(req.query.token);
   if (!foundToken) {
     throw new BadRequestError('Token is invalid');
   }
@@ -287,7 +297,7 @@ const confirmAdminSignup = catchAsync(async (req, res) => {
   user.role = 'admin';
   await user.save();
 
-  await AdminVerifyToken.findByIdAndRemove(foundToken.id);
+  await AdminVerifyToken.findByIdAndDelete(foundToken.id);
 
   createSendToken(user, 200, req, res);
 });
