@@ -2,7 +2,6 @@ import { Router } from 'express';
 import * as authControllers from '../controllers/auth';
 import { currentUser } from '../middlewares/current-user';
 import { requireAuth } from '../middlewares/require-auth';
-import { restrictTo } from '../middlewares/restrict-to';
 import { validateRequest } from '../middlewares/validate-request';
 import {
   confirmAdminSignupValidator,
