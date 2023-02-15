@@ -1,8 +1,19 @@
-import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { useEffect } from 'react';
 
 function App() {
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch('/api/umerdidthis');
+      const data = await res.json();
+
+      console.log(data);
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="App">
       <header className="App-header">
