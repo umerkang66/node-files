@@ -1,7 +1,7 @@
-import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
+import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 
-const sendEmail = async (options) => {
+const sendEmail = async options => {
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOS,
     port: process.env.SMTP_PORT,
@@ -22,7 +22,7 @@ const sendEmail = async (options) => {
   return response;
 };
 
-async function getJwtToken(id) {
+function getJwtToken(id) {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_TIME,
   });

@@ -1,7 +1,7 @@
-import User from "../models/users.js";
-import { getJwtToken, sendEmail } from "../utils/helpers.js";
-import bcrypt from "bcryptjs";
-import { S3Service } from "../utils/s3Service.js";
+import User from '../models/user.js';
+import { getJwtToken, sendEmail } from '../utils/helpers.js';
+import bcrypt from 'bcryptjs';
+import { S3Service } from '../utils/s3Service.js';
 
 // Register a new user   =>   /api/v1/register
 export const registerUser = async (req, res) => {
@@ -10,7 +10,7 @@ export const registerUser = async (req, res) => {
 
     if (!name || !email || !password) {
       return res.status(400).json({
-        error: "Please enter all values",
+        error: 'Please enter all values',
       });
     }
 
@@ -22,7 +22,7 @@ export const registerUser = async (req, res) => {
       password,
     });
 
-    const token = await getJwtToken(user?.id);
+    const token = getJwtToken(user?.id);
 
     res.status(201).json({
       token,
@@ -30,7 +30,7 @@ export const registerUser = async (req, res) => {
   } catch (error) {
     if (error.code === 11000) {
       res.status(400).json({
-        error: "Duplicate email",
+        error: 'Duplicate email',
       });
     }
   }
@@ -44,16 +44,16 @@ export const loginUser = async (req, res, next) => {
     // Checks if email or password is entered by user
     if (!email || !password) {
       return res.status(400).json({
-        error: "Please enter email & Password",
+        error: 'Please enter email & Password',
       });
     }
 
     // Finding user in database
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
       return res.status(401).json({
-        error: "Invalid Email or Password",
+        error: 'Invalid Email or Password',
       });
     }
 
@@ -62,18 +62,18 @@ export const loginUser = async (req, res, next) => {
 
     if (!isPasswordMatched) {
       return res.status(401).json({
-        error: "Invalid Email or Password",
+        error: 'Invalid Email or Password',
       });
     }
 
-    const token = await getJwtToken(user?.id);
+    const token = getJwtToken(user?.id);
 
     res.status(200).json({
       token,
     });
   } catch (error) {
     res.status(500).json({
-      error: "Error while loggin in",
+      error: 'Error while loggin in',
     });
   }
 };
@@ -89,9 +89,9 @@ export const uploadImage = async (req, res) => {
 
 export const sendEmailToUser = async (req, res) => {
   const response = await sendEmail({
-    email: "test@gmail.com",
-    subject: "Password Reset",
-    message: "This is test message",
+    email: 'test@gmail.com',
+    subject: 'Password Reset',
+    message: 'This is test message',
   });
 
   res.status(200).json({
@@ -102,6 +102,6 @@ export const sendEmailToUser = async (req, res) => {
 
 export const test = async (req, res) => {
   res.status(200).json({
-    test: "hello",
+    test: 'hello',
   });
 };
