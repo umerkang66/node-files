@@ -1,1 +1,1 @@
-# Movie Booking Frontend
+# Movie Review Frontend

@@ -1,7 +1,7 @@
 {
   "name": "movie-reviews",
   "version": "1.0.0",
-  "description": "Mern stack Movies Review project",
+  "description": "Mern Stack Movies Review project",
   "main": "index.js",
   "author": "UmerKang",
   "license": "MIT",
