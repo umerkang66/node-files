@@ -10,11 +10,6 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-app.get('/api/umerdidthis', (_, res) => {
-  console.log('umer did this');
-  res.send({ name: 'kangdidthis' });
-});
-
 // Routes
 app.use('/api/auth', authRouter);
 // These routes are all controlled by admin

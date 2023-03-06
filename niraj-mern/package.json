@@ -6,17 +6,23 @@
   "author": "UmerKang",
   "license": "MIT",
   "scripts": {
-    "dev": "export NODE_ENV=development && ts-node-dev src/index.ts",
-    "build": "tsc",
+    "dev": "export NODE_ENV=development && concurrently 'ts-node-dev src/index.ts' 'yarn --cwd client dev'",
+    "build": "concurrently 'tsc' 'yarn --cwd client build'",
     "start": "export NODE_ENV=production && node dist/index.js",
-    "test": "jest --watch",
-    "test:ci": "jest"
+    "test:server": "jest --watch",
+    "test:client": "yarn --cwd client test",
+    "test": "concurrently 'yarn test:server' 'yarn test:client'",
+    "test:ci": "concurrently 'jest' 'yarn --cwd client test:ci'"
   },
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
     "setupFilesAfterEnv": [
       "./src/test/setup.ts"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/dist/",
+      "<rootDir>/client/"
     ]
   },
   "devDependencies": {
@@ -26,6 +32,7 @@
     "@types/jsonwebtoken": "^9.0.1",
     "@types/nodemailer": "^6.4.7",
     "@types/supertest": "^2.0.12",
+    "concurrently": "^7.6.0",
     "jest": "^29.3.1",
     "mongodb-memory-server": "^8.11.2",
     "supertest": "^6.3.3",
@@ -34,7 +41,6 @@
     "typescript": "^4.9.4"
   },
   "dependencies": {
-    "@typegoose/typegoose": "^10.0.0",
     "@types/express": "^4.17.15",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
