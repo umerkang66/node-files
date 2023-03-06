@@ -25,7 +25,7 @@ const currentUser: RequestHandler = async (req, res, next) => {
     const user = await User.findById(payload.id);
     if (!user) return next();
 
-    if (user.changedPasswordAfter(payload.iat as number)) {
+    if (user.passwordChangedAfter(payload.iat as number)) {
       // if the user's password has been changed after the token has been issued
       // then token should not work
       return next();

@@ -48,7 +48,7 @@ interface UserDocument extends mongoose.Document {
     token: string
   ) => Promise<ResetPasswordTokenDocument | null>;
   validatePassword: (candidatePassword: string) => Promise<boolean>;
-  changedPasswordAfter: (jwtIssuedAt: number) => boolean;
+  passwordChangedAfter: (jwtIssuedAt: number) => boolean;
   addAdminVerifyToken: () => Promise<string>;
   checkAdminVerifyToken: (
     token: string
@@ -127,7 +127,7 @@ userSchema.methods.validatePassword = async function (
   return await Password.compare(candidatePassword, this.password);
 };
 
-userSchema.methods.changedPasswordAfter = function (
+userSchema.methods.passwordChangedAfter = function (
   jwtIssuedAt: number
 ): boolean {
   // jwtIssuedAt is in seconds

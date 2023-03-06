@@ -217,8 +217,7 @@ describe('Current User', () => {
   it('responds undefined if user is not logged in', async () => {
     const res = await request(app).get('/api/auth/currentuser').send();
 
-    const { currentUser } = res.body;
-    expect(currentUser).toBeNull();
+    expect(res.body.currentUser).toBeNull();
   });
 });
 

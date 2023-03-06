@@ -20,7 +20,7 @@ export const errorHandler: ErrorHandler = (err, req, res, next) => {
   }
 
   // It is not one of the defined errors
-  console.log(err);
+  console.log('🎇🎇🎇', err);
   res.status(500).send({
     errors: [{ message: 'Something went wrong' }],
   });
