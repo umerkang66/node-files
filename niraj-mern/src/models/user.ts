@@ -149,7 +149,8 @@ userSchema.methods.passwordChangedAfter = function (
 userSchema.methods.addEmailVerifyToken = async function (
   this: UserDocument
 ): Promise<string> {
-  const token = Password.createToken(6);
+  // this will create a 8 digit token
+  const token = Password.createToken(4);
 
   await EmailVerifyToken.build({ token, owner: this.id }).save();
 
@@ -193,12 +194,10 @@ userSchema.methods.checkResetPasswordToken = async function (
 userSchema.methods.addAdminVerifyToken = async function (
   this: UserDocument
 ): Promise<string> {
-  const token = Password.createToken();
+  // this will create a 8 digit token
+  const token = Password.createToken(4);
 
-  await AdminVerifyToken.build({
-    owner: this.id,
-    token,
-  }).save();
+  await AdminVerifyToken.build({ owner: this.id, token }).save();
 
   return token;
 };

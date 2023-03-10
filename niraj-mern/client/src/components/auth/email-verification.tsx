@@ -9,12 +9,13 @@ import {
 import { Container } from '../common/container';
 import { Submit, Title } from '../form';
 
-const OPT_LENGTH = 6;
-const EMPTIED_VALUE = -1;
+const OPT_LENGTH = 8;
+const EMPTIED_VALUE = '';
+const EMPTY_SPACE = ' ';
 
 const EmailVerification: FC = () => {
   const [otp, setOtp] = useState(
-    new Array(OPT_LENGTH).fill(EMPTIED_VALUE) as number[]
+    new Array(OPT_LENGTH).fill(EMPTIED_VALUE) as string[]
   );
   const [activeOtpInput, setActiveOtpInput] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -29,22 +30,36 @@ const EmailVerification: FC = () => {
     setActiveOtpInput(currActive > 0 ? currActive - 1 : currActive);
   };
 
+  const setOtpValueHandler = (currentIndex: number, value: string): void => {
+    if (value === EMPTY_SPACE) {
+      console.log(value);
+      // empty space
+      return;
+    }
+
+    // value is string because it is coming from form
+    // set the value to the current, even if the value is provided or not
+    setOtp(prevOtp => {
+      const valueToAdded = value.substring(0, 1) || EMPTIED_VALUE;
+
+      const newOtp = [...prevOtp];
+      newOtp[currentIndex] = valueToAdded;
+      return newOtp;
+    });
+  };
+
   const handleOptChange = (
     { target: { value } }: ChangeEvent<HTMLInputElement>,
     currentIndex: number
   ) => {
     // we need to move forwards
+    if (value === EMPTY_SPACE) {
+      return;
+    }
+
     if (value) {
       focusNextInputField(currentIndex);
-
-      // set the value to the current, even if the value is provided or not
-      setOtp(prevOtp => {
-        const valueToAdded = value.substring(0, 1) || EMPTIED_VALUE.toString(); // we have to convert it to string, because down the line this is converted into number
-
-        const newOtp = [...prevOtp];
-        newOtp[currentIndex] = +valueToAdded;
-        return newOtp;
-      });
+      setOtpValueHandler(currentIndex, value);
     }
   };
 
@@ -54,12 +69,7 @@ const EmailVerification: FC = () => {
   ) => {
     if (key === 'Backspace') {
       // first empty out the value then move backward
-      setOtp(prevOtp => {
-        const newOtp = [...prevOtp];
-        newOtp[currentIndex] = EMPTIED_VALUE;
-        return newOtp;
-      });
-
+      setOtpValueHandler(currentIndex, '');
       // move to the backwards
       focusPreviousInputField(currentIndex);
     }
@@ -71,28 +81,29 @@ const EmailVerification: FC = () => {
   }, [activeOtpInput]);
 
   useEffect(() => {
-    function listener(event: globalThis.ClipboardEvent): void {
-      const numbers = new Array(OPT_LENGTH).fill(EMPTIED_VALUE);
+    const listener = (event: globalThis.ClipboardEvent): void => {
+      const characters = new Array(OPT_LENGTH).fill(EMPTIED_VALUE);
       let i = 0;
 
       if (event.clipboardData) {
-        for (const num of event.clipboardData.getData('Text').trim()) {
-          if (i === numbers.length) {
+        const pastedText = event.clipboardData.getData('Text').trim();
+        if (pastedText.length > OPT_LENGTH) {
+          return;
+        }
+
+        for (const char of pastedText) {
+          if (i === characters.length) {
             break;
           }
-
-          const numToSend = +num;
-          if (isNaN(numToSend)) {
-            return;
-          }
-
-          numbers[i] = +num;
+          characters[i] = char;
           i++;
         }
       }
-      setOtp(numbers);
-      setActiveOtpInput(numbers.length - 1);
-    }
+
+      setOtp(characters);
+      setActiveOtpInput(characters.length - 1);
+    };
+
     document.addEventListener('paste', listener);
     return () => document.removeEventListener('paste', listener);
   }, []);
@@ -102,7 +113,7 @@ const EmailVerification: FC = () => {
       <Container>
         <form className="bg-secondary rounded p-6 space-y-6">
           <div>
-            <Title>Please enter the OTP to verify your account</Title>
+            <Title>Please enter the 8 digits OTP to verify your account</Title>
             <p className="text-center text-dark-subtle">
               OTP has been sent to your email
             </p>
@@ -116,7 +127,7 @@ const EmailVerification: FC = () => {
               return (
                 <input
                   ref={activeOtpInput === i ? inputRef : null}
-                  type="number"
+                  type="text"
                   key={i}
                   value={otp[i] === EMPTIED_VALUE ? '' : otp[i]}
                   onChange={e => handleOptChange(e, i)}
