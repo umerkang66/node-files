@@ -6,19 +6,28 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
 import { Form, Submit, Title } from '../form';
 import { P } from '../common/typography';
+import { useConfirmSignup } from '../../hooks/auth';
+import { toast } from 'react-hot-toast';
 
 const OPT_LENGTH = 8;
 const EMPTIED_VALUE = '';
 const EMPTY_SPACE = ' ';
 
-const EmailVerification: FC = () => {
+const ConfirmSignup: FC = () => {
   const [otp, setOtp] = useState(
     new Array(OPT_LENGTH).fill(EMPTIED_VALUE) as string[]
   );
   const [activeOtpInput, setActiveOtpInput] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const confirmSignupHook = useConfirmSignup();
+
+  // This userId is coming from useNavigate state from the previous signup function
+  const { state } = useLocation();
+  const navigate = useNavigate();
 
   const focusNextInputField = (currActive: number) => {
     setActiveOtpInput(
@@ -108,35 +117,68 @@ const EmailVerification: FC = () => {
     return () => document.removeEventListener('paste', listener);
   }, []);
 
+  useEffect(() => {
+    if (confirmSignupHook.errors) {
+      toast.dismiss();
+
+      confirmSignupHook.errors.forEach(err => toast.error(err.message));
+    }
+
+    if (confirmSignupHook.data && !confirmSignupHook.errors) {
+      toast.dismiss();
+
+      toast.success('You account is successfully verified');
+
+      navigate('/');
+    }
+  }, [navigate, confirmSignupHook.data, confirmSignupHook.errors]);
+
+  const onSubmitHandler = () => {
+    // this state is coming from react router dom
+    // if state or userId is not available, form will not be visible thus, there will be nothing to trigger the submit event
+    confirmSignupHook.confirmSignup(otp.join(''), state.userId);
+  };
+
   return (
-    <Form>
-      <div>
-        <Title>Please enter the 8 digits OTP to verify your account</Title>
-        <P>OTP has been sent to your email</P>
-        <P>You can also PASTE the OTP</P>
-      </div>
+    <Form onSubmit={onSubmitHandler}>
+      {state && state.userId ? (
+        <>
+          <div>
+            <Title>Please enter the 8 digits OTP to verify your account</Title>
+            <P>OTP has been sent to your email</P>
+            <P>You can also PASTE the OTP</P>
+          </div>
 
-      <div className="flex justify-center items-center space-x-4">
-        {otp.map((_, i) => {
-          return (
-            <input
-              ref={activeOtpInput === i ? inputRef : null}
-              type="text"
-              key={i}
-              value={otp[i] === EMPTIED_VALUE ? '' : otp[i]}
-              onChange={e => handleOptChange(e, i)}
-              onKeyDown={e => handleBackspaceKey(e, i)}
-              onClick={() => setActiveOtpInput(i)}
-              className="w-12 h-12 border-2 dark:border-dark-subtle border-light-subtle dark:focus:border-white focus:border-primary rounded bg-transparent outline-none text-center dark:text-white text-primary font-semibold spin-button-none"
-            />
-            // last className will remove the number buttons
-          );
-        })}
-      </div>
+          <div className="flex justify-center items-center space-x-4">
+            {otp.map((_, i) => {
+              return (
+                <input
+                  ref={activeOtpInput === i ? inputRef : null}
+                  type="text"
+                  key={i}
+                  value={otp[i] === EMPTIED_VALUE ? '' : otp[i]}
+                  onChange={e => handleOptChange(e, i)}
+                  onKeyDown={e => handleBackspaceKey(e, i)}
+                  onClick={() => setActiveOtpInput(i)}
+                  className="w-12 h-12 border-2 dark:border-dark-subtle border-light-subtle dark:focus:border-white focus:border-primary rounded bg-transparent outline-none text-center dark:text-white text-primary font-semibold spin-button-none"
+                />
+                // last className will remove the number buttons
+              );
+            })}
+          </div>
 
-      <Submit value="Verify your account" />
+          <Submit
+            value="Verify your account"
+            isLoading={confirmSignupHook.loading}
+          />
+        </>
+      ) : (
+        <div>
+          <Title>🎇 You have signup before verify your email</Title>
+        </div>
+      )}
     </Form>
   );
 };
 
-export { EmailVerification };
+export { ConfirmSignup };

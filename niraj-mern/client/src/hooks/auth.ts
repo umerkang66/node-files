@@ -1,36 +1,45 @@
-import axios, { AxiosError } from 'axios';
-import { useState } from 'react';
-import { Errors } from '../types';
+import { useRequest } from './common';
 
-export function useSignup() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null as Errors | null);
-  const [data, setData] = useState(null as any);
+function useSignup() {
+  type SignupResponseType = { userId: string; message: string };
 
-  const signup = async (
-    userInfo: {
-      name: string;
-      email: string;
-      password: string;
-      passwordConfirm: string;
-    },
-    callback?: () => void
-  ) => {
-    setLoading(true);
+  const [doRequest, data, loading, errors] = useRequest<SignupResponseType>({
+    url: '/api/auth/signup',
+    method: 'post',
+  });
 
-    try {
-      const res = await axios.post('/api/auth/signup', userInfo);
-
-      setLoading(false);
-      setData(res.data);
-      if (callback) callback();
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof AxiosError) {
-        setError(err.response?.data.errors);
-      }
-    }
+  type UserInfoForSignup = {
+    name: string;
+    email: string;
+    password: string;
+    passwordConfirm: string;
   };
 
-  return { data, loading, error, signup };
+  function signup(userInfo: UserInfoForSignup) {
+    doRequest(userInfo);
+  }
+
+  return { signup, data, loading, errors };
 }
+
+function useConfirmSignup() {
+  type ConfirmSignupResponseType = {
+    id: string;
+    name: string;
+    email: string;
+  };
+
+  const [doRequest, data, loading, errors] =
+    useRequest<ConfirmSignupResponseType>({
+      url: '/api/auth/confirm-signup',
+      method: 'post',
+    });
+
+  const confirmSignup = (token: string, userId: string) => {
+    doRequest({ token, userId });
+  };
+
+  return { confirmSignup, data, loading, errors };
+}
+
+export { useSignup, useConfirmSignup };

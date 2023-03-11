@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import { errorHandler } from './middlewares/error-handler';
 import { authRouter } from './routes/auth';
 import { adminUsersRouter } from './routes/admin/users';
+import { NotFoundError } from './errors/not-found-error';
 
 const app = express();
 app.use(express.json());
@@ -27,6 +28,10 @@ if (process.env.NODE_ENV === 'production') {
     res.sendFile(path.join(staticPath, 'index.html'));
   });
 }
+
+app.use('*', (req, res, next) => {
+  next(new NotFoundError(`The api route '${req.baseUrl}' is not available`));
+});
 
 // Error Handler
 app.use(errorHandler);
