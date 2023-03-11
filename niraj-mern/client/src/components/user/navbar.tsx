@@ -1,17 +1,26 @@
 import type { FC } from 'react';
 import { BsFillSunFill } from 'react-icons/bs';
+import { useThemeContext } from '../../context/theme-provider';
 import { Container } from '../common/container';
+import { CustomLink } from '../common/custom-link';
 
 const Navbar: FC = () => {
+  const theme = useThemeContext();
+
   return (
     <div className="bg-secondary shadow-sm shadow-gray-500">
       <Container className="p-2">
         <div className="flex justify-between items-center">
-          <img src="/logo.png" alt="Logo" className="h-10" />
+          <CustomLink to="/">
+            <img src="/logo.png" alt="Logo" className="h-10" />
+          </CustomLink>
 
           <ul className="flex items-center space-x-4">
             <li>
-              <button className="bg-dark-subtle p-1 rounded">
+              <button
+                onClick={theme.toggleTheme}
+                className="dark:bg-white bg-dark-subtle p-1 rounded"
+              >
                 <BsFillSunFill className="text-secondary" size={24} />
               </button>
             </li>
@@ -22,7 +31,9 @@ const Navbar: FC = () => {
                 placeholder="search..."
               />
             </li>
-            <li className="text-white font-semibold text-lg">Login</li>
+            <li className="text-white font-semibold text-lg">
+              <CustomLink to="/auth/signin">Sign in</CustomLink>
+            </li>
           </ul>
         </div>
       </Container>

@@ -4,14 +4,17 @@ import {
   Route,
   RouterProvider,
 } from 'react-router-dom';
-import ConfirmPassword from './components/auth/confirm-password';
-import EmailVerification from './components/auth/email-verification';
-import ForgetPassword from './components/auth/forgot-password';
+// Routes
+import { ResetPassword } from './components/auth/reset-password';
+import { EmailVerification } from './components/auth/email-verification';
+import { ForgetPassword } from './components/auth/forget-password';
 import { Signin } from './components/auth/signin';
 import { Signup } from './components/auth/signup';
 import { RootLayout } from './components/layout/root-layout';
 import { ErrorPage } from './pages/error-page';
 import { Home } from './pages/home';
+// Contexts
+import { ThemeContextProvider } from './context/theme-provider';
 
 export function App() {
   const router = createBrowserRouter(
@@ -23,10 +26,14 @@ export function App() {
         <Route path="auth/signup" element={<Signup />} />
         <Route path="auth/verification" element={<EmailVerification />} />
         <Route path="auth/forget-password" element={<ForgetPassword />} />
-        <Route path="auth/confirm-password" element={<ConfirmPassword />} />
+        <Route path="auth/reset-password" element={<ResetPassword />} />
       </Route>
     )
   );
 
-  return <RouterProvider router={router} />;
+  return (
+    <ThemeContextProvider>
+      <RouterProvider router={router} />
+    </ThemeContextProvider>
+  );
 }

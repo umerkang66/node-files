@@ -6,8 +6,8 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Container } from '../common/container';
-import { Submit, Title } from '../form';
+import { Form, Submit, Title } from '../form';
+import { P } from '../common/typography';
 
 const OPT_LENGTH = 8;
 const EMPTIED_VALUE = '';
@@ -109,42 +109,34 @@ const EmailVerification: FC = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-primary -z-10 flex justify-center items-center">
-      <Container>
-        <form className="bg-secondary rounded p-6 space-y-6">
-          <div>
-            <Title>Please enter the 8 digits OTP to verify your account</Title>
-            <p className="text-center text-dark-subtle">
-              OTP has been sent to your email
-            </p>
-            <p className="text-center text-dark-subtle">
-              You can also PASTE the OTP
-            </p>
-          </div>
+    <Form>
+      <div>
+        <Title>Please enter the 8 digits OTP to verify your account</Title>
+        <P>OTP has been sent to your email</P>
+        <P>You can also PASTE the OTP</P>
+      </div>
 
-          <div className="flex justify-center items-center space-x-4">
-            {otp.map((_, i) => {
-              return (
-                <input
-                  ref={activeOtpInput === i ? inputRef : null}
-                  type="text"
-                  key={i}
-                  value={otp[i] === EMPTIED_VALUE ? '' : otp[i]}
-                  onChange={e => handleOptChange(e, i)}
-                  onKeyDown={e => handleBackspaceKey(e, i)}
-                  onClick={() => setActiveOtpInput(i)}
-                  className="w-12 h-12 border-2 border-dark-subtle focus:border-white rounded bg-transparent outline-none text-center text-white font-semibold spin-button-none"
-                />
-                // last className will remove the number buttons
-              );
-            })}
-          </div>
+      <div className="flex justify-center items-center space-x-4">
+        {otp.map((_, i) => {
+          return (
+            <input
+              ref={activeOtpInput === i ? inputRef : null}
+              type="text"
+              key={i}
+              value={otp[i] === EMPTIED_VALUE ? '' : otp[i]}
+              onChange={e => handleOptChange(e, i)}
+              onKeyDown={e => handleBackspaceKey(e, i)}
+              onClick={() => setActiveOtpInput(i)}
+              className="w-12 h-12 border-2 dark:border-dark-subtle border-light-subtle dark:focus:border-white focus:border-primary rounded bg-transparent outline-none text-center dark:text-white text-primary font-semibold spin-button-none"
+            />
+            // last className will remove the number buttons
+          );
+        })}
+      </div>
 
-          <Submit value="Verify your account" />
-        </form>
-      </Container>
-    </div>
+      <Submit value="Verify your account" />
+    </Form>
   );
 };
 
-export default EmailVerification;
+export { EmailVerification };

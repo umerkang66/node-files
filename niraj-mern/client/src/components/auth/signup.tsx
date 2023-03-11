@@ -1,31 +1,68 @@
-import type { FC } from 'react';
-import { Container } from '../common/container';
+import { type ChangeEventHandler, type FC, useState } from 'react';
+
 import { CustomLink } from '../common/custom-link';
-import { FormInput, Submit, Title } from '../form';
+import { Form, FormInput, Submit, Title } from '../form';
+import { useSignup } from '../../hooks/auth';
 
 const Signup: FC = () => {
-  return (
-    <div className="fixed inset-0 bg-primary -z-10 flex justify-center items-center">
-      <Container>
-        <form className="bg-secondary rounded p-6 w-80 space-y-6 mt-20">
-          <Title>Sign up</Title>
-          <FormInput label="Name" placeholder="John Doe" name="name" />
-          <FormInput label="Email" placeholder="john@email.com" name="email" />
-          <FormInput label="Password" placeholder="********" name="password" />
-          <FormInput
-            label="Password Confirm"
-            placeholder="********"
-            name="password-confirm"
-          />
-          <Submit value="Sign up" />
+  const [userInfo, setUserInfo] = useState({
+    name: '',
+    email: '',
+    password: '',
+    passwordConfirm: '',
+  });
+  const { name, email, password, passwordConfirm } = userInfo;
 
-          <div className="flex justify-between">
-            <CustomLink to="/auth/forget-password">Forget password</CustomLink>
-            <CustomLink to="/auth/signin">Sign in</CustomLink>
-          </div>
-        </form>
-      </Container>
-    </div>
+  const { data, loading, signup } = useSignup();
+
+  console.log(data);
+
+  const handleInputChange: ChangeEventHandler<HTMLInputElement> = ({
+    target: { name, value },
+  }) => {
+    setUserInfo(prev => ({ ...prev, [name]: value }));
+  };
+
+  return (
+    <Form className="w-80" onSubmit={() => signup(userInfo)}>
+      <Title>Sign up</Title>
+      <FormInput
+        label="Name"
+        placeholder="John Doe"
+        name="name"
+        value={name}
+        onChange={handleInputChange}
+      />
+      <FormInput
+        label="Email"
+        placeholder="john@email.com"
+        name="email"
+        value={email}
+        onChange={handleInputChange}
+      />
+      <FormInput
+        type="password"
+        label="Password"
+        placeholder="********"
+        name="password"
+        value={password}
+        onChange={handleInputChange}
+      />
+      <FormInput
+        type="password"
+        label="Password Confirm"
+        placeholder="********"
+        name="passwordConfirm"
+        value={passwordConfirm}
+        onChange={handleInputChange}
+      />
+      <Submit value="Sign up" isLoading={loading} />
+
+      <div className="flex justify-between">
+        <CustomLink to="/auth/forget-password">Forget password</CustomLink>
+        <CustomLink to="/auth/signin">Sign in</CustomLink>
+      </div>
+    </Form>
   );
 };
 
