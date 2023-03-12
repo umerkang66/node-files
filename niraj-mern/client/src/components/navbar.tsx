@@ -1,11 +1,14 @@
 import type { FC } from 'react';
 import { BsFillSunFill } from 'react-icons/bs';
-import { useThemeContext } from '../../context/theme-provider';
-import { Container } from '../common/container';
-import { CustomLink } from '../common/custom-link';
+
+import { useThemeContext } from '../context/theme-provider';
+import { useCurrentUser } from '../hooks/auth';
+import { Container } from './common/container';
+import { CustomLink } from './common/custom-link';
 
 const Navbar: FC = () => {
   const theme = useThemeContext();
+  const { data, loading } = useCurrentUser();
 
   return (
     <div className="bg-secondary shadow-sm shadow-gray-500">
@@ -32,7 +35,17 @@ const Navbar: FC = () => {
               />
             </li>
             <li className="text-white font-semibold text-lg">
-              <CustomLink to="/auth/signin">Sign in</CustomLink>
+              {!loading && (!data || !data.currentUser) && (
+                <CustomLink to="/auth/signin">Sign in</CustomLink>
+              )}
+              {!loading && data && data.currentUser && (
+                <>
+                  {data.currentUser.name}
+                  <button className="ml-2 rounded bg-red-500 py-1 px-4">
+                    Sign Out
+                  </button>
+                </>
+              )}
             </li>
           </ul>
         </div>

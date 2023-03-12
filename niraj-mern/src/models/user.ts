@@ -22,6 +22,7 @@ interface UserAttrs {
 type Role = 'user' | 'admin';
 // This type will be returned to the frontend
 type UserSerialized = Omit<UserAttrs, 'password'> & {
+  id: string;
   // these are actually 'dates'
   createdAt: string | number | Date;
   updatedAt: string | number | Date;

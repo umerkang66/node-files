@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { useRouteError } from 'react-router-dom';
 import { CustomLink } from '../components/common/custom-link';
-import { Navbar } from '../components/user/navbar';
+import { Navbar } from '../components/navbar';
 
 const ErrorPage: FC = () => {
   const error = useRouteError() as any;

@@ -1,10 +1,10 @@
 type Theme = 'light' | 'dark';
 
-function getTheme(): Theme {
+function getThemeFromLocalStorage(): Theme {
   return (localStorage.getItem('theme') as Theme) || 'light';
 }
 
-function setTheme(theme: Theme): void {
+function setThemeFromLocalStorage(theme: Theme): void {
   localStorage.setItem('theme', theme);
 }
 
@@ -16,4 +16,9 @@ function updateThemeInDocument(theme: Theme, themeToRemove?: Theme): void {
   document.documentElement.classList.add(theme);
 }
 
-export { type Theme, getTheme, setTheme, updateThemeInDocument };
+export {
+  type Theme,
+  getThemeFromLocalStorage,
+  setThemeFromLocalStorage,
+  updateThemeInDocument,
+};

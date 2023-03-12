@@ -1,5 +1,5 @@
 import type { FC, FormEventHandler, PropsWithChildren } from 'react';
-import { Container } from '../common/container';
+import { Container } from '../container';
 import { FormContainer } from './form-container';
 
 const Form: FC<

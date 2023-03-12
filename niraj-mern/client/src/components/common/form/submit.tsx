@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Button } from '../common/button';
+import { Button } from '../button';
 
 type Props = { value: string | number; isLoading?: boolean };
 

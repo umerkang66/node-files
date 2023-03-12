@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { CustomLink } from '../common/custom-link';
-import { Form, FormInput, Submit, Title } from '../form';
+import { Form, FormInput, Submit, Title } from '../common/form';
 
 const ForgetPassword: FC = () => {
   return (

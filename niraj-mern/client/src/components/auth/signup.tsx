@@ -1,10 +1,10 @@
 import { type ChangeEventHandler, type FC, useState, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { useNotificationContext } from '../../context/notification-provider';
 import { useSignup } from '../../hooks/auth';
 
 import { CustomLink } from '../common/custom-link';
-import { Form, FormInput, Submit, Title } from '../form';
+import { Form, FormInput, Submit, Title } from '../common/form';
 
 const Signup: FC = () => {
   const [userInfo, setUserInfo] = useState({
@@ -16,6 +16,8 @@ const Signup: FC = () => {
   const { name, email, password, passwordConfirm } = userInfo;
   const navigate = useNavigate();
   const signupHook = useSignup();
+  const { updateNotifications, clearPreviousNotifications } =
+    useNotificationContext();
 
   const handleInputChange: ChangeEventHandler<HTMLInputElement> = ({
     target: { name, value },
@@ -28,16 +30,16 @@ const Signup: FC = () => {
   };
 
   useEffect(() => {
-    if (signupHook.errors) {
-      toast.dismiss();
+    clearPreviousNotifications();
 
-      signupHook.errors.forEach(err => toast.error(err.message));
+    if (signupHook.errors) {
+      signupHook.errors.forEach(err =>
+        updateNotifications({ text: err.message, status: 'error' })
+      );
     }
 
     if (signupHook.data && !signupHook.errors) {
-      toast.dismiss();
-
-      toast.success(signupHook.data.message);
+      updateNotifications({ text: signupHook.data.message, status: 'success' });
 
       navigate('/auth/confirm-signup', {
         state: { userId: signupHook.data.userId },
@@ -45,7 +47,13 @@ const Signup: FC = () => {
         replace: true,
       });
     }
-  }, [navigate, signupHook.data, signupHook.errors]);
+  }, [
+    clearPreviousNotifications,
+    updateNotifications,
+    navigate,
+    signupHook.data,
+    signupHook.errors,
+  ]);
 
   return (
     <Form className="w-80 mt-20" onSubmit={handleSubmit}>

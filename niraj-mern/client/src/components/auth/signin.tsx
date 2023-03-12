@@ -1,7 +1,7 @@
-import type { FC } from 'react';
+import { FC } from 'react';
 
 import { CustomLink } from '../common/custom-link';
-import { Title, FormInput, Submit, Form } from '../form';
+import { Title, FormInput, Submit, Form } from '../common/form';
 
 const Signin: FC = () => {
   return (

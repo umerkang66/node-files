@@ -16,30 +16,30 @@ import { ErrorPage } from './pages/error-page';
 import { Home } from './pages/home';
 // Contexts
 import { ThemeContextProvider } from './context/theme-provider';
-import { Toaster } from 'react-hot-toast';
+import NotificationProvider from './context/notification-provider';
 
 export function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<RootLayout />} errorElement={<ErrorPage />}>
         <Route index element={<Home />} />
-
-        <Route path="auth/signin" element={<Signin />} />
-        <Route path="auth/signup" element={<Signup />} />
-        <Route path="auth/confirm-signup" element={<ConfirmSignup />} />
-        <Route path="auth/forget-password" element={<ForgetPassword />} />
-        <Route path="auth/reset-password" element={<ResetPassword />} />
+        <Route path="auth">
+          {/* if the above route has element, it will act as layout */}
+          <Route path="signin" element={<Signin />} />
+          <Route path="signup" element={<Signup />} />
+          <Route path="confirm-signup" element={<ConfirmSignup />} />
+          <Route path="forget-password" element={<ForgetPassword />} />
+          <Route path="reset-password" element={<ResetPassword />} />
+        </Route>
       </Route>
     )
   );
 
   return (
     <ThemeContextProvider>
-      <RouterProvider router={router} />
-      <Toaster
-        position="bottom-right"
-        toastOptions={{ duration: 4000, style: { backgroundColor: '#eeebff' } }}
-      />
+      <NotificationProvider>
+        <RouterProvider router={router} />
+      </NotificationProvider>
     </ThemeContextProvider>
   );
 }

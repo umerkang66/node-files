@@ -1,4 +1,4 @@
-import { Form, FormInput, Submit, Title } from '../form';
+import { Form, FormInput, Submit, Title } from '../common/form';
 
 function ResetPassword() {
   return (

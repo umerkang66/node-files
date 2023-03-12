@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
+import { CurrentUser } from '../types';
 import { useRequest } from './common';
 
 function useSignup() {
   type SignupResponseType = { userId: string; message: string };
 
-  const [doRequest, data, loading, errors] = useRequest<SignupResponseType>({
+  const { doRequest, data, loading, errors } = useRequest<SignupResponseType>({
     url: '/api/auth/signup',
     method: 'post',
   });
@@ -29,7 +31,7 @@ function useConfirmSignup() {
     email: string;
   };
 
-  const [doRequest, data, loading, errors] =
+  const { doRequest, data, loading, errors } =
     useRequest<ConfirmSignupResponseType>({
       url: '/api/auth/confirm-signup',
       method: 'post',
@@ -42,4 +44,22 @@ function useConfirmSignup() {
   return { confirmSignup, data, loading, errors };
 }
 
-export { useSignup, useConfirmSignup };
+function useCurrentUser() {
+  type CurrentUserResponse = { currentUser: CurrentUser };
+
+  // 'useCache' only makes sense in queries
+  // and 'refetch' also makes sense in queries
+  const { doRequest, refetch, data, loading, errors } =
+    useRequest<CurrentUserResponse>({
+      url: '/api/auth/currentuser',
+      useCache: true,
+    });
+
+  useEffect(() => {
+    doRequest();
+  }, [doRequest]);
+
+  return { data, loading, errors, refetch };
+}
+
+export { useSignup, useConfirmSignup, useCurrentUser };
