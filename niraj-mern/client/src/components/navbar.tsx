@@ -1,45 +1,32 @@
 import { FC, useEffect } from 'react';
 import { BsFillSunFill } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 import { useThemeContext } from '../context/theme-provider';
-import { useNotificationContext } from '../context/notification-provider';
 
 import { useUser } from '../hooks/auth/useUser';
 import { useSignout } from '../hooks/auth/useSignout';
 import { Container } from './common/container';
 import { CustomLink } from './common/custom-link';
+import { Spinner } from './common/spinner';
 
 const Navbar: FC = () => {
-  const { clearPreviousNotifications, updateNotifications } =
-    useNotificationContext();
   const theme = useThemeContext();
   const user = useUser();
   const signoutHook = useSignout();
   const navigate = useNavigate();
 
   useEffect(() => {
-    clearPreviousNotifications();
-
-    if (signoutHook.data && signoutHook.data.message) {
-      updateNotifications({
-        text: signoutHook.data.message,
-        status: 'success',
-      });
+    if (signoutHook.data?.message) {
+      toast.success(signoutHook.data.message);
     }
-
     if (signoutHook.error) {
-      signoutHook.error.forEach(err => {
-        updateNotifications({ text: err.message, status: 'error' });
-      });
+      signoutHook.error.forEach(err =>
+        toast.error(err.message)
+      );
     }
-  }, [
-    navigate,
-    clearPreviousNotifications,
-    updateNotifications,
-    signoutHook.data,
-    signoutHook.error,
-  ]);
+  }, [signoutHook.data?.message, signoutHook.error]);
 
   const signoutHandler = () => {
     signoutHook.signout().then(() => navigate('/'));
@@ -50,7 +37,11 @@ const Navbar: FC = () => {
       <Container className="p-2">
         <div className="flex justify-between items-center">
           <CustomLink to="/">
-            <img src="/logo.png" alt="Logo" className="h-10" />
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="h-10"
+            />
           </CustomLink>
 
           <ul className="flex items-center space-x-4">
@@ -59,7 +50,10 @@ const Navbar: FC = () => {
                 onClick={theme.toggleTheme}
                 className="dark:bg-white bg-dark-subtle p-1 rounded"
               >
-                <BsFillSunFill className="text-secondary" size={24} />
+                <BsFillSunFill
+                  className="text-secondary"
+                  size={24}
+                />
               </button>
             </li>
             <li>
@@ -70,21 +64,32 @@ const Navbar: FC = () => {
               />
             </li>
             <li className="text-white font-semibold text-lg">
-              {!user.isLoading && (!user.data || !user.data.currentUser) && (
-                <CustomLink to="/auth/signin">Sign in</CustomLink>
-              )}
-              {!user.isLoading && user.data && user.data.currentUser && (
-                <>
-                  {user.data.currentUser.name}
-                  <button
-                    onClick={signoutHandler}
-                    className="ml-2 rounded bg-red-500 py-1 px-4"
-                    disabled={signoutHook.isLoading}
-                  >
-                    {signoutHook.isLoading ? 'Signing Out...' : 'Sign Out'}
-                  </button>
-                </>
-              )}
+              {!user.isLoading &&
+                (!user.data || !user.data.currentUser) && (
+                  <CustomLink to="/auth/signin">
+                    Sign in
+                  </CustomLink>
+                )}
+              {!user.isLoading &&
+                user.data &&
+                user.data.currentUser && (
+                  <div className="flex justify-center items-center">
+                    {user.data.currentUser.name}
+                    <button
+                      onClick={signoutHandler}
+                      className="ml-2 rounded bg-red-500 py-1 px-4 flex justify-center items-center"
+                      disabled={signoutHook.isLoading}
+                    >
+                      {signoutHook.isLoading ? (
+                        <>
+                          Sign Out <Spinner />
+                        </>
+                      ) : (
+                        'Sign Out'
+                      )}
+                    </button>
+                  </div>
+                )}
             </li>
           </ul>
         </div>

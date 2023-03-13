@@ -7,11 +7,11 @@ import {
   useState,
 } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 import { Form, Submit, Title } from '../common/form';
 import { P } from '../common/typography';
 import { useConfirmSignup } from '../../hooks/auth/useConfirmSignup';
-import { useNotificationContext } from '../../context/notification-provider';
 
 const OPT_LENGTH = 8;
 const EMPTIED_VALUE = '';
@@ -24,10 +24,6 @@ const ConfirmSignup: FC = () => {
   const [activeOtpInput, setActiveOtpInput] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const confirmSignupHook = useConfirmSignup();
-  const {
-    clearPreviousNotifications,
-    updateNotifications,
-  } = useNotificationContext();
 
   // This userId is coming from useNavigate state from the previous signup function
   const { state } = useLocation();
@@ -137,30 +133,19 @@ const ConfirmSignup: FC = () => {
   }, []);
 
   useEffect(() => {
-    clearPreviousNotifications();
-
     if (confirmSignupHook.error) {
       confirmSignupHook.error.forEach(err =>
-        updateNotifications({
-          text: err.message,
-          status: 'error',
-        })
+        toast.error(err.message)
       );
     }
-
     if (
-      confirmSignupHook.data &&
+      confirmSignupHook.data?.name &&
       !confirmSignupHook.error
     ) {
-      updateNotifications({
-        text: 'You account is successfully verified',
-        status: 'success',
-      });
+      toast.success('You account is successfully verified');
     }
   }, [
-    clearPreviousNotifications,
-    updateNotifications,
-    confirmSignupHook.data,
+    confirmSignupHook.data?.name,
     confirmSignupHook.error,
   ]);
 

@@ -1,5 +1,9 @@
-import type { ButtonHTMLAttributes, FC, PropsWithChildren } from 'react';
-import { SpinnerCircularFixed } from 'spinners-react';
+import type {
+  ButtonHTMLAttributes,
+  FC,
+  PropsWithChildren,
+} from 'react';
+import { Spinner } from './spinner';
 
 const Button: FC<
   PropsWithChildren & {
@@ -14,18 +18,7 @@ const Button: FC<
       {...rest}
     >
       {children}
-      {isLoading && (
-        <SpinnerCircularFixed
-          className="ml-2"
-          size={23}
-          speed={300}
-          thickness={200}
-          // color="#382b2b"
-          // secondaryColor="#6e5656"
-          color="#fff"
-          secondaryColor="#b5b5b5"
-        />
-      )}
+      {isLoading && <Spinner />}
     </button>
   );
 };

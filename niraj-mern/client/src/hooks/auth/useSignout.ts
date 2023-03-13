@@ -12,10 +12,8 @@ const signoutFn = catchErrors(async (url: string) => {
 });
 
 function useSignout() {
-  const { trigger, data, error, isMutating } = useSWRMutation(
-    Keys.signout,
-    signoutFn
-  );
+  const { trigger, data, error, isMutating } =
+    useSWRMutation(Keys.signout, signoutFn);
 
   const signout = async () => {
     await trigger();
