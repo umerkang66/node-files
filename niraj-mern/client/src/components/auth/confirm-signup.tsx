@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Form, Submit, Title } from '../common/form';
 import { P } from '../common/typography';
-import { useConfirmSignup } from '../../hooks/auth';
+import { useConfirmSignup } from '../../hooks/auth/useConfirmSignup';
 import { useNotificationContext } from '../../context/notification-provider';
 
 const OPT_LENGTH = 8;
@@ -24,8 +24,10 @@ const ConfirmSignup: FC = () => {
   const [activeOtpInput, setActiveOtpInput] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const confirmSignupHook = useConfirmSignup();
-  const { clearPreviousNotifications, updateNotifications } =
-    useNotificationContext();
+  const {
+    clearPreviousNotifications,
+    updateNotifications,
+  } = useNotificationContext();
 
   // This userId is coming from useNavigate state from the previous signup function
   const { state } = useLocation();
@@ -33,17 +35,23 @@ const ConfirmSignup: FC = () => {
 
   const focusNextInputField = (currActive: number) => {
     setActiveOtpInput(
-      currActive < OPT_LENGTH - 1 ? currActive + 1 : currActive
+      currActive < OPT_LENGTH - 1
+        ? currActive + 1
+        : currActive
     );
   };
 
   const focusPreviousInputField = (currActive: number) => {
-    setActiveOtpInput(currActive > 0 ? currActive - 1 : currActive);
+    setActiveOtpInput(
+      currActive > 0 ? currActive - 1 : currActive
+    );
   };
 
-  const setOtpValueHandler = (currentIndex: number, value: string): void => {
+  const setOtpValueHandler = (
+    currentIndex: number,
+    value: string
+  ): void => {
     if (value === EMPTY_SPACE) {
-      console.log(value);
       // empty space
       return;
     }
@@ -51,7 +59,8 @@ const ConfirmSignup: FC = () => {
     // value is string because it is coming from form
     // set the value to the current, even if the value is provided or not
     setOtp(prevOtp => {
-      const valueToAdded = value.substring(0, 1) || EMPTIED_VALUE;
+      const valueToAdded =
+        value.substring(0, 1) || EMPTIED_VALUE;
 
       const newOtp = [...prevOtp];
       newOtp[currentIndex] = valueToAdded;
@@ -92,12 +101,18 @@ const ConfirmSignup: FC = () => {
   }, [activeOtpInput]);
 
   useEffect(() => {
-    const listener = (event: globalThis.ClipboardEvent): void => {
-      const characters = new Array(OPT_LENGTH).fill(EMPTIED_VALUE);
+    const listener = (
+      event: globalThis.ClipboardEvent
+    ): void => {
+      const characters = new Array(OPT_LENGTH).fill(
+        EMPTIED_VALUE
+      );
       let i = 0;
 
       if (event.clipboardData) {
-        const pastedText = event.clipboardData.getData('Text').trim();
+        const pastedText = event.clipboardData
+          .getData('Text')
+          .trim();
         if (pastedText.length > OPT_LENGTH) {
           return;
         }
@@ -116,38 +131,48 @@ const ConfirmSignup: FC = () => {
     };
 
     document.addEventListener('paste', listener);
-    return () => document.removeEventListener('paste', listener);
+    return () => {
+      document.removeEventListener('paste', listener);
+    };
   }, []);
 
   useEffect(() => {
     clearPreviousNotifications();
 
-    if (confirmSignupHook.errors) {
-      confirmSignupHook.errors.forEach(err =>
-        updateNotifications({ text: err.message, status: 'error' })
+    if (confirmSignupHook.error) {
+      confirmSignupHook.error.forEach(err =>
+        updateNotifications({
+          text: err.message,
+          status: 'error',
+        })
       );
     }
 
-    if (confirmSignupHook.data && !confirmSignupHook.errors) {
+    if (
+      confirmSignupHook.data &&
+      !confirmSignupHook.error
+    ) {
       updateNotifications({
         text: 'You account is successfully verified',
         status: 'success',
       });
-
-      navigate('/');
     }
   }, [
     clearPreviousNotifications,
     updateNotifications,
-    navigate,
     confirmSignupHook.data,
-    confirmSignupHook.errors,
+    confirmSignupHook.error,
   ]);
 
   const onSubmitHandler = () => {
     // this state is coming from react router dom
     // if state or userId is not available, form will not be visible thus, there will be nothing to trigger the submit event
-    confirmSignupHook.confirmSignup(otp.join(''), state.userId);
+    confirmSignupHook
+      .confirmSignup({
+        token: otp.join(''),
+        userId: state.userId,
+      })
+      .then(() => navigate('/'));
   };
 
   return (
@@ -155,7 +180,10 @@ const ConfirmSignup: FC = () => {
       {state && state.userId ? (
         <>
           <div>
-            <Title>Please enter the 8 digits OTP to verify your account</Title>
+            <Title>
+              Please enter the 8 digits OTP to verify your
+              account
+            </Title>
             <P>OTP has been sent to your email</P>
             <P>You can also PASTE the OTP</P>
           </div>
@@ -164,10 +192,14 @@ const ConfirmSignup: FC = () => {
             {otp.map((_, i) => {
               return (
                 <input
-                  ref={activeOtpInput === i ? inputRef : null}
+                  ref={
+                    activeOtpInput === i ? inputRef : null
+                  }
                   type="text"
                   key={i}
-                  value={otp[i] === EMPTIED_VALUE ? '' : otp[i]}
+                  value={
+                    otp[i] === EMPTIED_VALUE ? '' : otp[i]
+                  }
                   onChange={e => handleOptChange(e, i)}
                   onKeyDown={e => handleBackspaceKey(e, i)}
                   onClick={() => setActiveOtpInput(i)}
@@ -180,12 +212,14 @@ const ConfirmSignup: FC = () => {
 
           <Submit
             value="Verify your account"
-            isLoading={confirmSignupHook.loading}
+            isLoading={confirmSignupHook.isLoading}
           />
         </>
       ) : (
         <div>
-          <Title>🎇 You have signup before verify your email</Title>
+          <Title>
+            🎇 You have to signup before verify your email
+          </Title>
         </div>
       )}
     </Form>

@@ -1,14 +1,49 @@
-import type { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { BsFillSunFill } from 'react-icons/bs';
+import { useNavigate } from 'react-router-dom';
 
 import { useThemeContext } from '../context/theme-provider';
-import { useCurrentUser } from '../hooks/auth';
+import { useNotificationContext } from '../context/notification-provider';
+
+import { useUser } from '../hooks/auth/useUser';
+import { useSignout } from '../hooks/auth/useSignout';
 import { Container } from './common/container';
 import { CustomLink } from './common/custom-link';
 
 const Navbar: FC = () => {
+  const { clearPreviousNotifications, updateNotifications } =
+    useNotificationContext();
   const theme = useThemeContext();
-  const { data, loading } = useCurrentUser();
+  const user = useUser();
+  const signoutHook = useSignout();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    clearPreviousNotifications();
+
+    if (signoutHook.data && signoutHook.data.message) {
+      updateNotifications({
+        text: signoutHook.data.message,
+        status: 'success',
+      });
+    }
+
+    if (signoutHook.error) {
+      signoutHook.error.forEach(err => {
+        updateNotifications({ text: err.message, status: 'error' });
+      });
+    }
+  }, [
+    navigate,
+    clearPreviousNotifications,
+    updateNotifications,
+    signoutHook.data,
+    signoutHook.error,
+  ]);
+
+  const signoutHandler = () => {
+    signoutHook.signout().then(() => navigate('/'));
+  };
 
   return (
     <div className="bg-secondary shadow-sm shadow-gray-500">
@@ -35,14 +70,18 @@ const Navbar: FC = () => {
               />
             </li>
             <li className="text-white font-semibold text-lg">
-              {!loading && (!data || !data.currentUser) && (
+              {!user.isLoading && (!user.data || !user.data.currentUser) && (
                 <CustomLink to="/auth/signin">Sign in</CustomLink>
               )}
-              {!loading && data && data.currentUser && (
+              {!user.isLoading && user.data && user.data.currentUser && (
                 <>
-                  {data.currentUser.name}
-                  <button className="ml-2 rounded bg-red-500 py-1 px-4">
-                    Sign Out
+                  {user.data.currentUser.name}
+                  <button
+                    onClick={signoutHandler}
+                    className="ml-2 rounded bg-red-500 py-1 px-4"
+                    disabled={signoutHook.isLoading}
+                  >
+                    {signoutHook.isLoading ? 'Signing Out...' : 'Sign Out'}
                   </button>
                 </>
               )}

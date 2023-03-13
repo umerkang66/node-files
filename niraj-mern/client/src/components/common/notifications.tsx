@@ -30,7 +30,7 @@ const Notifications: FC = () => {
             key={i}
             className={`mb-2 shadow-md dark:shadow-gray-700 shadow-gray-400 ${colorClassName} rounded`}
           >
-            <p className="text-white px-4 py-2 font-semibold">
+            <p className="text-white px-6 py-4 font-semibold">
               {notification.text}
             </p>
           </div>

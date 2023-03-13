@@ -69,5 +69,4 @@ function NotificationProvider({ children }: PropsWithChildren) {
   );
 }
 
-export { useNotificationContext };
-export default NotificationProvider;
+export { NotificationProvider, useNotificationContext };

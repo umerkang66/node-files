@@ -1,7 +1,8 @@
 import { type ChangeEventHandler, type FC, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import { useNotificationContext } from '../../context/notification-provider';
-import { useSignup } from '../../hooks/auth';
+import { useSignup } from '../../hooks/auth/useSignup';
 
 import { CustomLink } from '../common/custom-link';
 import { Form, FormInput, Submit, Title } from '../common/form';
@@ -32,13 +33,13 @@ const Signup: FC = () => {
   useEffect(() => {
     clearPreviousNotifications();
 
-    if (signupHook.errors) {
-      signupHook.errors.forEach(err =>
+    if (signupHook.error) {
+      signupHook.error.forEach(err =>
         updateNotifications({ text: err.message, status: 'error' })
       );
     }
 
-    if (signupHook.data && !signupHook.errors) {
+    if (signupHook.data && !signupHook.error) {
       updateNotifications({ text: signupHook.data.message, status: 'success' });
 
       navigate('/auth/confirm-signup', {
@@ -48,11 +49,11 @@ const Signup: FC = () => {
       });
     }
   }, [
+    navigate,
     clearPreviousNotifications,
     updateNotifications,
-    navigate,
     signupHook.data,
-    signupHook.errors,
+    signupHook.error,
   ]);
 
   return (
@@ -88,7 +89,7 @@ const Signup: FC = () => {
         value={passwordConfirm}
         onChange={handleInputChange}
       />
-      <Submit value="Sign up" isLoading={signupHook.loading} />
+      <Submit value="Sign up" isLoading={signupHook.isLoading} />
 
       <div className="flex justify-between">
         <CustomLink to="/auth/forget-password">Forget password</CustomLink>

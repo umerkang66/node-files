@@ -5,7 +5,7 @@ import {
   RouterProvider,
 } from 'react-router-dom';
 
-// Routes
+// Components
 import { ResetPassword } from './components/auth/reset-password';
 import { ConfirmSignup } from './components/auth/confirm-signup';
 import { ForgetPassword } from './components/auth/forget-password';
@@ -16,7 +16,8 @@ import { ErrorPage } from './pages/error-page';
 import { Home } from './pages/home';
 // Contexts
 import { ThemeContextProvider } from './context/theme-provider';
-import NotificationProvider from './context/notification-provider';
+import { NotificationProvider } from './context/notification-provider';
+import { AuthProvider } from './context/auth-provider';
 
 export function App() {
   const router = createBrowserRouter(
@@ -37,9 +38,11 @@ export function App() {
 
   return (
     <ThemeContextProvider>
-      <NotificationProvider>
-        <RouterProvider router={router} />
-      </NotificationProvider>
+      <AuthProvider>
+        <NotificationProvider>
+          <RouterProvider router={router} />
+        </NotificationProvider>
+      </AuthProvider>
     </ThemeContextProvider>
   );
 }
