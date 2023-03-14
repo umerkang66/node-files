@@ -8,7 +8,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-import { useSignup } from '../../hooks/auth/useSignup';
+import { useSignup } from '../../hooks/auth/use-signup';
 
 import { CustomLink } from '../common/custom-link';
 import {

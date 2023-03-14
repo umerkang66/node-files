@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 
 import { Form, Submit, Title } from '../common/form';
 import { P } from '../common/typography';
-import { useConfirmSignup } from '../../hooks/auth/useConfirmSignup';
+import { useConfirmSignup } from '../../hooks/auth/use-confirm-signup';
 
 const OPT_LENGTH = 8;
 const EMPTIED_VALUE = '';
@@ -139,15 +139,12 @@ const ConfirmSignup: FC = () => {
       );
     }
     if (
-      confirmSignupHook.data?.name &&
+      confirmSignupHook.data &&
       !confirmSignupHook.error
     ) {
       toast.success('You account is successfully verified');
     }
-  }, [
-    confirmSignupHook.data?.name,
-    confirmSignupHook.error,
-  ]);
+  }, [confirmSignupHook.data, confirmSignupHook.error]);
 
   const onSubmitHandler = () => {
     // this state is coming from react router dom

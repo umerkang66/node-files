@@ -5,8 +5,8 @@ import { toast } from 'react-toastify';
 
 import { useThemeContext } from '../context/theme-provider';
 
-import { useUser } from '../hooks/auth/useUser';
-import { useSignout } from '../hooks/auth/useSignout';
+import { useUser } from '../hooks/auth/use-user';
+import { useSignout } from '../hooks/auth/use-signout';
 import { Container } from './common/container';
 import { CustomLink } from './common/custom-link';
 import { Spinner } from './common/spinner';
@@ -18,7 +18,7 @@ const Navbar: FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (signoutHook.data?.message) {
+    if (signoutHook.data) {
       toast.success(signoutHook.data.message);
     }
     if (signoutHook.error) {
@@ -26,7 +26,7 @@ const Navbar: FC = () => {
         toast.error(err.message)
       );
     }
-  }, [signoutHook.data?.message, signoutHook.error]);
+  }, [signoutHook.data, signoutHook.error]);
 
   const signoutHandler = () => {
     signoutHook.signout().then(() => navigate('/'));
