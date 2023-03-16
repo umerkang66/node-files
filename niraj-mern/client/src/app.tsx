@@ -53,6 +53,7 @@ export function App() {
     <ThemeContextProvider>
       <RouterProvider router={router} />
       <ToastContainer
+        autoClose={3000}
         theme="dark"
         position="bottom-right"
         toastStyle={{ backgroundColor: '#4f4242' }}

@@ -1,8 +1,12 @@
-import { createContext, useContext, useEffect } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+} from 'react';
 
 import {
   getThemeFromLocalStorage,
-  setThemeFromLocalStorage,
+  setThemeToLocalStorage,
   Theme,
   updateThemeInDocument,
 } from '../utils/theme-utils';
@@ -16,13 +20,16 @@ function useThemeContext() {
   return useContext(ThemeContext);
 }
 
-function ThemeContextProvider({ children }: React.PropsWithChildren) {
+function ThemeContextProvider({
+  children,
+}: React.PropsWithChildren) {
   function toggleTheme() {
     const previousTheme = getThemeFromLocalStorage();
-    const newTheme: Theme = previousTheme === 'light' ? 'dark' : 'light';
+    const newTheme: Theme =
+      previousTheme === 'light' ? 'dark' : 'light';
 
     updateThemeInDocument(newTheme, previousTheme);
-    setThemeFromLocalStorage(newTheme);
+    setThemeToLocalStorage(newTheme);
   }
 
   useEffect(() => {

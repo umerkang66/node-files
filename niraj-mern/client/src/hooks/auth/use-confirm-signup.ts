@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import useSWRMutation from 'swr/mutation';
 import { mutate } from 'swr';
 import axios from 'axios';
@@ -19,10 +20,13 @@ function useConfirmSignup() {
 
   type Body = { token: string; userId: string };
 
-  const confirmSignup = async (body: Body) => {
-    await trigger(body);
-    return mutate(Keys.currentUser);
-  };
+  const confirmSignup = useCallback(
+    async (body: Body) => {
+      await trigger(body);
+      return mutate(Keys.currentUser);
+    },
+    [trigger]
+  );
 
   return {
     confirmSignup,

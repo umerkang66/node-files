@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { mutate } from 'swr';
 import useSWRMutation from 'swr/mutation';
 import axios from 'axios';
@@ -15,10 +16,10 @@ function useSignout() {
   const { trigger, data, error, isMutating } =
     useSWRMutation(Keys.signout, signoutFn);
 
-  const signout = async () => {
+  const signout = useCallback(async () => {
     await trigger();
     return mutate(Keys.currentUser);
-  };
+  }, [trigger]);
 
   return {
     signout,
