@@ -1,5 +1,7 @@
 import {
   createContext,
+  FC,
+  PropsWithChildren,
   useContext,
   useEffect,
 } from 'react';
@@ -16,13 +18,11 @@ const ThemeContext = createContext({
   toggleTheme: () => {},
 } as ThemeValues);
 
-function useThemeContext() {
-  return useContext(ThemeContext);
-}
+const useThemeContext = () => useContext(ThemeContext);
 
-function ThemeContextProvider({
+const ThemeContextProvider: FC<PropsWithChildren> = ({
   children,
-}: React.PropsWithChildren) {
+}) => {
   function toggleTheme() {
     const previousTheme = getThemeFromLocalStorage();
     const newTheme: Theme =
@@ -42,6 +42,6 @@ function ThemeContextProvider({
       {children}
     </ThemeContext.Provider>
   );
-}
+};
 
 export { useThemeContext, ThemeContextProvider };

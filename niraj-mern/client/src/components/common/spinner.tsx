@@ -6,7 +6,7 @@ function Spinner({ size = 23 }: Props) {
   return (
     <SpinnerCircularFixed
       className="ml-2"
-      size={23}
+      size={size}
       speed={300}
       thickness={200}
       // color="#382b2b"
