@@ -10,3 +10,7 @@ async function run<T extends () => Promise<void> | void>(func: T) {
   await func();
   await mongoose.disconnect();
 }
+
+const umer = () => console.log('kang did this');
+
+run(umer);
