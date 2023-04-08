@@ -1,4 +1,4 @@
 import { run } from './run';
-import { createUser, updateUser } from './utils/user';
+import { checkPassword } from './utils/user';
 
-run(createUser, updateUser);
+run(checkPassword);

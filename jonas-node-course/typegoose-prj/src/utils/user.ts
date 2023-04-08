@@ -1,5 +1,6 @@
 import { User } from '../models/user';
 import { catchAsync } from './catchAsync';
+import { createPost } from './post';
 
 let num = 1;
 
@@ -9,14 +10,17 @@ const createUser = catchAsync(async () => {
   const user = new User({
     email: `test${num}@test.com`,
     username: 'umer did this',
+    password: 'umerdidthis',
     job: { company: 'company', title: 'developer' },
   });
+
   num++;
   return user.save();
 });
 
 const queryAllUsers = async () => {
   const users = await User.find();
+
   console.log(users);
 };
 
@@ -34,4 +38,12 @@ const deleteAllUsers = () => {
   return User.deleteMany();
 };
 
-export { createUser, queryAllUsers, updateUser, deleteAllUsers };
+const checkPassword = async () => {
+  const user = await createUser();
+
+  const isCorrect = await user.comparePassword('umerdidthis');
+
+  console.log(isCorrect);
+};
+
+export { createUser, queryAllUsers, updateUser, deleteAllUsers, checkPassword };
