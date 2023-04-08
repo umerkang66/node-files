@@ -6,19 +6,21 @@
   "scripts": {
     "dev": "nodemon src/main.ts",
     "build": "tsc",
-    "start": "tsc && node dist/main.js"
+    "start": "node dist/main.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^18.15.11",
+    "@types/validator": "^13.7.14",
     "nodemon": "^2.0.22",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4"
   },
   "dependencies": {
     "@typegoose/typegoose": "^11.0.0",
-    "mongoose": "^7.0.3"
+    "mongoose": "^7.0.3",
+    "validator": "^13.9.0"
   }
 }
