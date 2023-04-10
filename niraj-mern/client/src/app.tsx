@@ -11,7 +11,7 @@ import { SWRConfig } from 'swr';
 // Components
 import { ResetPassword } from './components/auth/reset-password';
 import { ConfirmSignup } from './components/auth/confirm-signup';
-import { ForgetPassword } from './components/auth/forget-password';
+import { ForgotPassword } from './components/auth/forgot-password';
 import { Signin } from './components/auth/signin';
 import { Signup } from './components/auth/signup';
 import { RootLayout } from './components/layout/root-layout';
@@ -31,7 +31,7 @@ export function App() {
           <Route path="signin" element={<Signin />} />
           <Route path="signup" element={<Signup />} />
           <Route path="confirm-signup" element={<ConfirmSignup />} />
-          <Route path="forget-password" element={<ForgetPassword />} />
+          <Route path="forget-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
         </Route>
       </Route>

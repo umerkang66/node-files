@@ -1,6 +1,5 @@
 import { useCallback, useEffect } from 'react';
 import useSWRMutation from 'swr/mutation';
-import { mutate } from 'swr';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -24,19 +23,16 @@ function useResendEmailVerification() {
   type Body = { userId: string };
 
   const resendEmailVerification = useCallback(
-    async (body: Body) => {
-      await trigger(body);
-      return mutate(Keys.currentUser);
-    },
+    (body: Body) => trigger(body),
     [trigger]
   );
 
   useEffect(() => {
     // error is handled globally
-    if (data && !error) {
+    if (data) {
       toast.success('Email verification token is sent');
     }
-  }, [data, error]);
+  }, [data]);
 
   return {
     resendEmailVerification,

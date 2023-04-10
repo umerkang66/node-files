@@ -184,7 +184,7 @@ const forgotPassword = catchAsync<{ email: string }>(async (req, res) => {
 
   const host = req.get('host');
 
-  const resetPasswordUrl = `${req.protocol}://${host}/api/auth/reset-password?token=${token}&userId=${user.id}`;
+  const resetPasswordUrl = `${req.protocol}://${host}/auth/reset-password?token=${token}&userId=${user.id}`;
 
   await sendResetPasswordTokenMail(resetPasswordUrl, user.email);
 

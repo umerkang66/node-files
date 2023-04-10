@@ -33,10 +33,10 @@ function useConfirmSignup() {
 
   useEffect(() => {
     // error is handled globally
-    if (data && !error) {
+    if (data) {
       toast.success('You account is successfully verified');
     }
-  }, [data, error]);
+  }, [data]);
 
   return {
     confirmSignup,

@@ -1,51 +1,51 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { mutate } from 'swr';
+import { useCallback, useEffect } from 'react';
 import useSWRMutation from 'swr/mutation';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
 
 import { Keys } from '../keys';
 import { Errors } from '../../types';
 import { catchErrors } from '../../utils/catch-errors';
 
-const signoutFn = catchErrors(async (url: string) => {
-  const res = await axios.post(url);
-  return res.data as { message: string };
-});
+const forgotPasswordFn = catchErrors(
+  async (url: string, { arg }: { arg: { email: string } }) => {
+    const res = await axios.post(url, arg);
+    return res.data as { userId: string; message: string };
+  }
+);
 
-function useSignout() {
+function useForgotPassword() {
   const { trigger, data, error, isMutating } = useSWRMutation(
-    Keys.signout,
-    signoutFn
+    Keys.forgotPassword,
+    forgotPasswordFn
   );
-  const _navigate = useNavigate();
-  const navigate = useRef(_navigate);
 
-  const signout = useCallback(async () => {
-    await trigger();
-    return mutate(Keys.currentUser);
-  }, [trigger]);
+  type Body = { email: string };
+  const forgotPassword = useCallback((body: Body) => trigger(body), [trigger]);
 
   useEffect(() => {
     // error is handled globally
-    if (data && data.message) {
+    if (data) {
       toast.success(data.message);
-      navigate.current('/');
+      /*navigate('/auth/reset-password', {
+        state: { userId: data.userId },
+        // delete the current page from back history
+        replace: true,
+      });*/
     }
     // navigate will not create a problem, because this component
     // and hooks will unmount, when the path changes,
     // problem will occur in navbar hooks, because that will
     // not be unmount, because navbar stays forever
     // here we have to memoize the navigate
-  }, [data, navigate]);
+  }, [data]);
 
   return {
-    signout,
+    forgotPassword,
     data,
     error: error as Errors | null,
     isLoading: isMutating,
   };
 }
 
-export { useSignout };
+export { useForgotPassword };
