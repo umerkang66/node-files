@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { mutate } from 'swr';
 import useSWRMutation from 'swr/mutation';
 import axios from 'axios';
@@ -19,7 +19,8 @@ function useSignout() {
     Keys.signout,
     signoutFn
   );
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
+  const navigate = useRef(_navigate);
 
   const signout = useCallback(async () => {
     await trigger();
@@ -28,8 +29,13 @@ function useSignout() {
 
   useEffect(() => {
     // error is handled globally
-    if (data) toast.success(data.message);
-    if (data && data.message) navigate('/');
+    if (data && !error) toast.success(data.message);
+    if (data && data.message) navigate.current('/');
+    // navigate will not create a problem, because this component
+    // and hooks will unmount, when the path changes,
+    // problem will occur in navbar hooks, because that will
+    // not be unmount, because navbar stays forever
+    // here we have to memoize the navigate
   }, [data, error, navigate]);
 
   return {

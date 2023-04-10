@@ -10,7 +10,7 @@ import { catchErrors } from '../../utils/catch-errors';
 import { Keys } from '../keys';
 
 const signinFn = catchErrors(async (url: string, { arg }: { arg: any }) => {
-  type ReturnType =
+  type SigninReturnType =
     | CurrentUser
     | {
         message: string;
@@ -19,7 +19,7 @@ const signinFn = catchErrors(async (url: string, { arg }: { arg: any }) => {
       };
 
   const res = await axios.post(url, arg);
-  return res.data as ReturnType;
+  return res.data as SigninReturnType;
 });
 
 function useSignin() {
@@ -40,7 +40,7 @@ function useSignin() {
 
   useEffect(() => {
     // error is handled globally
-    if (data && !error) {
+    if (data) {
       if (data.isVerified === false) {
         toast.warn('You are not verified, please verify your account');
         navigate('/auth/confirm-signup', {
@@ -53,7 +53,7 @@ function useSignin() {
         navigate('/');
       }
     }
-  }, [data, error, navigate]);
+  }, [data, navigate]);
 
   return {
     signin,

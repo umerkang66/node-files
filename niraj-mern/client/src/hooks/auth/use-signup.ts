@@ -9,14 +9,14 @@ import { catchErrors } from '../../utils/catch-errors';
 import { Keys } from '../keys';
 
 const signupFn = catchErrors(async (url: string, { arg }: { arg: any }) => {
-  type ReturnType = {
+  type SignupReturnType = {
     userId: string;
     message: string;
     isVerified: false;
   };
 
   const res = await axios.post(url, arg);
-  return res.data as ReturnType;
+  return res.data as SignupReturnType;
 });
 
 function useSignup() {
@@ -37,7 +37,7 @@ function useSignup() {
 
   useEffect(() => {
     // error is handled globally
-    if (data && !error) {
+    if (data) {
       toast.success(data.message);
       navigate('/auth/confirm-signup', {
         state: { userId: data.userId },
@@ -45,7 +45,11 @@ function useSignup() {
         replace: true,
       });
     }
-  }, [navigate, data, error]);
+    // navigate will not create a problem, because this component
+    // and hooks will unmount, when the path changes,
+    // problem will occur in navbar hooks, because that will
+    // not be unmount, because navbar stays forever
+  }, [navigate, data]);
 
   return {
     signup,
