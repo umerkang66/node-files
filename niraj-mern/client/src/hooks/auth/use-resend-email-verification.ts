@@ -2,11 +2,11 @@ import { useCallback, useEffect } from 'react';
 import useSWRMutation from 'swr/mutation';
 import { mutate } from 'swr';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 import { catchErrors } from '../../utils/catch-errors';
 import { Keys } from '../keys';
 import type { CurrentUser, Errors } from '../../types';
-import { toast } from 'react-toastify';
 
 const resendEmailVerificationFn = catchErrors(
   async (url: string, { arg }: { arg: any }) => {

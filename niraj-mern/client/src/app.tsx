@@ -45,7 +45,12 @@ export function App() {
           onError(err, key, config) {
             if (err instanceof Array) {
               const customError = err as Errors;
-              customError.forEach(err => toast.error(err.message));
+              customError.forEach(err => {
+                const message = `${err.field ? `Field:${err.field} ` : ''}${
+                  err.message
+                }`;
+                toast.error(message);
+              });
             } else {
               console.error(err);
               toast.error('Something went wrong');
