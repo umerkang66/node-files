@@ -1,22 +1,8 @@
-import {
-  type ChangeEventHandler,
-  type FC,
-  useState,
-  useEffect,
-  useCallback,
-} from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { type ChangeEventHandler, type FC, useState } from 'react';
 
 import { useSignup } from '../../hooks/auth/use-signup';
-
 import { CustomLink } from '../common/custom-link';
-import {
-  Form,
-  FormInput,
-  Submit,
-  Title,
-} from '../common/form';
+import { Form, FormInput, Submit, Title } from '../common/form';
 
 const Signup: FC = () => {
   const [userInfo, setUserInfo] = useState({
@@ -25,40 +11,18 @@ const Signup: FC = () => {
     password: '',
     passwordConfirm: '',
   });
-  const { name, email, password, passwordConfirm } =
-    userInfo;
-  const navigate = useNavigate();
-  const memoizedNavigate = useCallback(navigate, [
-    navigate,
-  ]);
-  const signupHook = useSignup();
+  const { name, email, password, passwordConfirm } = userInfo;
+  const signupMutation = useSignup();
 
-  const handleInputChange: ChangeEventHandler<
-    HTMLInputElement
-  > = ({ target: { name, value } }) => {
+  const handleInputChange: ChangeEventHandler<HTMLInputElement> = ({
+    target: { name, value },
+  }) => {
     setUserInfo(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = () => {
-    signupHook.signup(userInfo);
+    signupMutation.signup(userInfo);
   };
-
-  useEffect(() => {
-    if (signupHook.error) {
-      signupHook.error.forEach(err =>
-        toast.error(err.message)
-      );
-    }
-
-    if (signupHook.data && !signupHook.error) {
-      toast.success(signupHook.data.message);
-      memoizedNavigate('/auth/confirm-signup', {
-        state: { userId: signupHook.data.userId },
-        // delete the current page from back history
-        replace: true,
-      });
-    }
-  }, [memoizedNavigate, signupHook.data, signupHook.error]);
 
   return (
     <Form className="w-80 mt-20" onSubmit={handleSubmit}>
@@ -93,15 +57,10 @@ const Signup: FC = () => {
         value={passwordConfirm}
         onChange={handleInputChange}
       />
-      <Submit
-        value="Sign up"
-        isLoading={signupHook.isLoading}
-      />
+      <Submit value="Sign up" isLoading={signupMutation.isLoading} />
 
       <div className="flex justify-between">
-        <CustomLink to="/auth/forget-password">
-          Forget password
-        </CustomLink>
+        <CustomLink to="/auth/forget-password">Forget password</CustomLink>
         <CustomLink to="/auth/signin">Sign in</CustomLink>
       </div>
     </Form>

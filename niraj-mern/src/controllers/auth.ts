@@ -55,7 +55,7 @@ const resendEmailVerifyToken = catchAsync<{ userId: string }>(
     const existedToken = await EmailVerifyToken.findOne({ owner: userId });
     if (existedToken) {
       throw new BadRequestError(
-        'Only 1 hour later you can generated a new token'
+        'Only 1 hour later you can generate a new token'
       );
     }
 

@@ -1,4 +1,8 @@
-import type { FC, FormEventHandler, PropsWithChildren } from 'react';
+import type {
+  FC,
+  FormEventHandler,
+  PropsWithChildren,
+} from 'react';
 import { Container } from '../container';
 import { FormContainer } from './form-container';
 
@@ -8,22 +12,24 @@ const Form: FC<
     onSubmit?: () => void;
   }
 > = ({ children, className, onSubmit }) => {
-  const handleSubmit: FormEventHandler<HTMLFormElement> = e => {
+  const handleSubmit: FormEventHandler<
+    HTMLFormElement
+  > = e => {
     e.preventDefault();
     if (onSubmit) onSubmit();
   };
 
   return (
-    <FormContainer>
-      <Container>
+    <Container>
+      <FormContainer>
         <form
           onSubmit={handleSubmit}
           className={`dark:bg-secondary bg-white border-2 rounded p-6 space-y-6 ${className}`}
         >
           {children}
         </form>
-      </Container>
-    </FormContainer>
+      </FormContainer>
+    </Container>
   );
 };
 

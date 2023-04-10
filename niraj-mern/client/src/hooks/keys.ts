@@ -4,4 +4,5 @@ export enum Keys {
   signin = '/api/auth/signin',
   currentUser = '/api/auth/currentuser',
   signout = '/api/auth/signout',
+  resendEmailVerification = '/api/auth/resend-email-verify-token',
 }

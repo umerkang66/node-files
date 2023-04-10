@@ -19,6 +19,7 @@ export const createSendToken = (
 ) => {
   if (!user.isVerified) {
     const responseToSend = {
+      isVerified: false,
       userId: user.id,
       // default message
       message: 'User is not verified',

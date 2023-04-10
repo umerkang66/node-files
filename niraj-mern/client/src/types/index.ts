@@ -11,6 +11,6 @@ export type CurrentUser = {
   email: string;
   createdAt: string | number | Date;
   updatedAt: string | number | Date;
-  isVerified: boolean;
+  isVerified: true;
   role: Role;
 };

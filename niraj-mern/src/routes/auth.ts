@@ -12,7 +12,7 @@ import {
   signupValidator,
   updateMeValidator,
   updatePasswordValidator,
-  verifyEmailValidator,
+  confirmSignupValidator,
 } from '../validators/auth';
 
 const router = Router();
@@ -33,7 +33,7 @@ router.post(
 
 router.post(
   '/confirm-signup',
-  verifyEmailValidator,
+  confirmSignupValidator,
   validateRequest,
   authControllers.confirmSignup
 );

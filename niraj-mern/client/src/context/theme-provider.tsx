@@ -20,17 +20,17 @@ const ThemeContext = createContext({
 
 const useThemeContext = () => useContext(ThemeContext);
 
-const ThemeContextProvider: FC<PropsWithChildren> = ({
-  children,
-}) => {
-  function toggleTheme() {
+type ThemeCP = FC<PropsWithChildren>;
+
+const ThemeContextProvider: ThemeCP = ({ children }) => {
+  const toggleTheme = () => {
     const previousTheme = getThemeFromLocalStorage();
     const newTheme: Theme =
       previousTheme === 'light' ? 'dark' : 'light';
 
     updateThemeInDocument(newTheme, previousTheme);
     setThemeToLocalStorage(newTheme);
-  }
+  };
 
   useEffect(() => {
     const theme = getThemeFromLocalStorage();

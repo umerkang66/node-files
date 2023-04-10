@@ -8,22 +8,22 @@ import { Keys } from '../keys';
 import type { CurrentUser, Errors } from '../../types';
 import { toast } from 'react-toastify';
 
-const confirmSignupFn = catchErrors(
+const resendEmailVerificationFn = catchErrors(
   async (url: string, { arg }: { arg: any }) => {
     const res = await axios.post(url, arg);
     return res.data as CurrentUser;
   }
 );
 
-function useConfirmSignup() {
+function useResendEmailVerification() {
   const { trigger, data, error, isMutating } = useSWRMutation(
-    Keys.confirmSignup,
-    confirmSignupFn
+    Keys.resendEmailVerification,
+    resendEmailVerificationFn
   );
 
-  type Body = { token: string; userId: string };
+  type Body = { userId: string };
 
-  const confirmSignup = useCallback(
+  const resendEmailVerification = useCallback(
     async (body: Body) => {
       await trigger(body);
       return mutate(Keys.currentUser);
@@ -34,16 +34,16 @@ function useConfirmSignup() {
   useEffect(() => {
     // error is handled globally
     if (data && !error) {
-      toast.success('You account is successfully verified');
+      toast.success('Email verification token is sent');
     }
   }, [data, error]);
 
   return {
-    confirmSignup,
+    resendEmailVerification,
     data,
     error: error as Errors | null,
     isLoading: isMutating,
   };
 }
 
-export { useConfirmSignup };
+export { useResendEmailVerification };

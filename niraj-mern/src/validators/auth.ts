@@ -22,7 +22,7 @@ const resendEmailVerifyTokenValidator = [
     .withMessage('Invalid userId'),
 ];
 
-const verifyEmailValidator = [
+const confirmSignupValidator = [
   body('userId')
     .notEmpty()
     .withMessage('userId must be provided')
@@ -103,7 +103,7 @@ const confirmAdminSignupValidator = [
 export {
   signupValidator,
   resendEmailVerifyTokenValidator,
-  verifyEmailValidator,
+  confirmSignupValidator,
   signinValidator,
   updateMeValidator,
   updatePasswordValidator,

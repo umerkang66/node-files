@@ -11,10 +11,8 @@ const fetchUser = catchErrors(async (url: string) => {
 });
 
 function useUser() {
-  const { data, error, isLoading } = useSWR(
-    Keys.currentUser,
-    fetchUser
-  );
+  // error is handled globally
+  const { data, error, isLoading } = useSWR(Keys.currentUser, fetchUser);
 
   return {
     data,

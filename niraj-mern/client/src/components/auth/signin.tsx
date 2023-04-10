@@ -1,50 +1,24 @@
-import {
-  ChangeEventHandler,
-  FC,
-  useEffect,
-  useState,
-} from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { ChangeEventHandler, FC, useState } from 'react';
 
 import { useSignin } from '../../hooks/auth/use-signin';
 import { CustomLink } from '../common/custom-link';
-import {
-  Title,
-  FormInput,
-  Submit,
-  Form,
-} from '../common/form';
+import { Title, FormInput, Submit, Form } from '../common/form';
 
 const Signin: FC = () => {
   const [signinInfo, setSigninInfo] = useState({
     email: '',
     password: '',
   });
-  const signinHook = useSignin();
-  const navigate = useNavigate();
+  const signinMutation = useSignin();
 
-  const onChange: ChangeEventHandler<
-    HTMLInputElement
-  > = e => {
+  const onChange: ChangeEventHandler<HTMLInputElement> = e => {
     const { name, value } = e.target;
     setSigninInfo(prev => ({ ...prev, [name]: value }));
   };
 
   const onSubmit = () => {
-    signinHook.signin(signinInfo).then(() => navigate('/'));
+    signinMutation.signin(signinInfo);
   };
-
-  useEffect(() => {
-    if (signinHook.error) {
-      signinHook.error.forEach(err =>
-        toast.error(err.message)
-      );
-    }
-    if (signinHook.data && !signinHook.error) {
-      toast.success('You are successfully logged in');
-    }
-  }, [signinHook.data, signinHook.error]);
 
   return (
     <Form className="w-72" onSubmit={onSubmit}>
@@ -62,15 +36,10 @@ const Signin: FC = () => {
         type="password"
         onChange={onChange}
       />
-      <Submit
-        value="Sign in"
-        isLoading={signinHook.isLoading}
-      />
+      <Submit value="Sign in" isLoading={signinMutation.isLoading} />
 
       <div className="flex justify-between">
-        <CustomLink to="/auth/forget-password">
-          Forget password
-        </CustomLink>
+        <CustomLink to="/auth/forget-password">Forget password</CustomLink>
         <CustomLink to="/auth/signup">Sign up</CustomLink>
       </div>
     </Form>
