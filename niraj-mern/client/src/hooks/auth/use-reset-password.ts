@@ -15,7 +15,9 @@ const resetPasswordFn = catchErrors(
     { arg }: { arg: { password: string; passwordConfirm: string } }
   ) => {
     const res = await axios.patch(url, arg);
-    return res.data as CurrentUser;
+    return res.data as
+      | CurrentUser
+      | { isVerified: false; message: string; userId: string };
   }
 );
 
@@ -38,8 +40,17 @@ function useResetPassword(token: string, userId: string) {
   useEffect(() => {
     // error is handled globally
     if (data) {
-      toast.success('You have successfully reset the password');
-      navigate('/');
+      if (data.isVerified === false) {
+        toast.warn('You are not verified, please verify your account');
+        navigate('/auth/confirm-signup', {
+          state: { userId: data.userId },
+          // delete the current page from back history
+          replace: true,
+        });
+      } else {
+        toast.success('You have successfully reset the password');
+        navigate('/');
+      }
     }
     // navigate will not create a problem, because this component
     // and hooks will unmount, when the path changes,

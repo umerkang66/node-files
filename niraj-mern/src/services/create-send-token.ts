@@ -24,9 +24,7 @@ export const createSendToken = (
       // default message
       message: 'User is not verified',
     };
-
     if (nonVerifiedUserMessage) responseToSend.message = nonVerifiedUserMessage;
-
     return res.status(statusCode).send(responseToSend);
   }
 
