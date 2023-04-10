@@ -26,12 +26,8 @@ function useForgotPassword() {
   useEffect(() => {
     // error is handled globally
     if (data) {
+      // see the use signup hook, to know how to share state between routes
       toast.success(data.message);
-      /*navigate('/auth/reset-password', {
-        state: { userId: data.userId },
-        // delete the current page from back history
-        replace: true,
-      });*/
     }
     // navigate will not create a problem, because this component
     // and hooks will unmount, when the path changes,
