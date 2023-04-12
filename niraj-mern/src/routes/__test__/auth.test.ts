@@ -6,6 +6,11 @@ import { EmailVerifyToken } from '../../models/tokens/email-verify-token';
 import { ResetPasswordToken } from '../../models/tokens/reset-password-token';
 import { User, type UserDocument } from '../../models/user';
 import { Password } from '../../services/password';
+import {
+  addAdminVerifyToken,
+  addEmailVerifyToken,
+  addResetPasswordToken,
+} from '../../utils/token-utils';
 
 // in the same directory there should be __mocks__/mailer.ts
 jest.mock('../../emails/mailer');
@@ -71,7 +76,7 @@ describe('Resend Email Verification Token', () => {
   });
 
   it('returns 400, if token already exists', async () => {
-    await user.addEmailVerifyToken();
+    await addEmailVerifyToken(user.id);
 
     await request(app)
       .post('/api/auth/resend-email-verify-token')
@@ -106,7 +111,7 @@ describe('Confirm Signup', () => {
     }).save();
 
     const userId = user.id;
-    const token = await user.addEmailVerifyToken();
+    const token = await addEmailVerifyToken(user.id);
 
     const body = { userId, token };
     const res = await request(app)
@@ -315,7 +320,7 @@ describe('Forgot and Reset Password', () => {
 
   it('changes the password of user after token is provided', async () => {
     // Create the token
-    const token = await user.addResetPasswordToken();
+    const token = await addResetPasswordToken(user.id);
     const url = `/api/auth/reset-password?token=${token}&userId=${user.id}`;
 
     const newPass = 'newPassword';
@@ -385,7 +390,7 @@ describe('Signup admin with token', () => {
       password: 'password',
     }).save();
 
-    token = await user.addAdminVerifyToken();
+    token = await addAdminVerifyToken(user.id);
   });
 
   it('sets the role to "admin" if correct token is provided', async () => {

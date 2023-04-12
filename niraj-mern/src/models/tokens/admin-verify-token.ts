@@ -1,60 +1,47 @@
 import mongoose from 'mongoose';
+import {
+  Ref,
+  getModelForClass,
+  modelOptions,
+  pre,
+  prop,
+} from '@typegoose/typegoose';
 import { Password } from '../../services/password';
+import { UserClass } from '../user';
 
 interface AdminVerifyTokenAttrs {
-  owner: string | mongoose.ObjectId;
+  owner: string | mongoose.Types.ObjectId;
   token: string;
 }
 
-type AdminVerifyTokenDocument = mongoose.Document &
-  AdminVerifyTokenAttrs & { createdAt: string | number | Date };
-
-type BuildFn = (attrs: AdminVerifyTokenAttrs) => AdminVerifyTokenDocument;
-
-interface AdminVerifyTokenModel
-  extends mongoose.Model<AdminVerifyTokenDocument> {
-  build: BuildFn;
-}
-
-const adminVerifyTokenSchema = new mongoose.Schema({
-  owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    // This id belongs to this model 'User'
-    ref: 'User',
-    required: true,
-  },
-  token: {
-    type: String,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    // if type is date, it can have expires property
-    // now this document will expires after
-    expires: 3600, // in seconds -> 1 Hour
-    default: () => Date.now(), // we can also write it as 'Date.now' as func
-  },
-});
-
-adminVerifyTokenSchema.pre('save', async function (next) {
+@pre<AdminVerifyTokenClass>('save', async function () {
   if (this.isModified('token')) {
     // this doesn't use the bcrypt, because these tokens are not that important
     const hashedToken = Password.hashToken(this.token);
     this.set('token', hashedToken);
   }
-  next();
-});
+})
+@modelOptions({
+  // in seconds -> 1 Hour
+  schemaOptions: {
+    timestamps: true,
+    expires: 3600,
+    collection: 'adminVerifyTokens',
+  },
+})
+class AdminVerifyTokenClass {
+  @prop({ required: true })
+  token: string;
 
-adminVerifyTokenSchema.statics.build = function (
-  attrs: AdminVerifyTokenAttrs
-): AdminVerifyTokenDocument {
-  // after building this document in the model, it should be saved()
-  return new AdminVerifyToken(attrs);
-};
+  @prop({ required: true, ref: () => UserClass })
+  owner: Ref<UserClass>;
 
-const AdminVerifyToken = mongoose.model<
-  AdminVerifyTokenDocument,
-  AdminVerifyTokenModel
->('AdminVerifyToken', adminVerifyTokenSchema);
+  static build(attrs: AdminVerifyTokenAttrs) {
+    // after building this document in the model, it should be saved()
+    return new AdminVerifyToken(attrs);
+  }
+}
 
-export { AdminVerifyToken, type AdminVerifyTokenDocument };
+const AdminVerifyToken = getModelForClass(AdminVerifyTokenClass);
+
+export { AdminVerifyToken };

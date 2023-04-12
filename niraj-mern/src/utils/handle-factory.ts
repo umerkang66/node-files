@@ -1,14 +1,10 @@
+import type { ReturnModelType } from '@typegoose/typegoose';
 import type { Document, Model, PopulateOptions } from 'mongoose';
 import { NotFoundError } from '../errors/not-found-error';
 import { ApiFeatures } from './api-features';
 import { catchAsync } from './catch-async';
 
-// T is document, K is ModAttrs
-interface IMod<T extends Document> extends Model<T> {
-  build(docAttrs: any): T;
-}
-
-function getAll<T extends Document>(Mod: IMod<T>) {
+function getAll(Mod: ReturnModelType<any>) {
   return catchAsync(async (req, res) => {
     const query = Mod.find();
     const requestQuery = req.query;
@@ -20,13 +16,13 @@ function getAll<T extends Document>(Mod: IMod<T>) {
       .sort()
       .paginate();
 
-    const documents = (await features.getQuery()) as T[];
+    const documents = await features.getQuery();
     res.send(documents);
   });
 }
 
-function getOne<T extends Document>(
-  Mod: IMod<T>,
+function getOne(
+  Mod: ReturnModelType<any>,
   populateOptions?: PopulateOptions[]
 ) {
   return catchAsync(async (req, res) => {
@@ -37,7 +33,7 @@ function getOne<T extends Document>(
       query.populate(populateOptions);
     }
 
-    const document = (await query) as T;
+    const document = await query;
 
     if (!document) {
       throw new NotFoundError('Document with this id is not found');
@@ -46,23 +42,23 @@ function getOne<T extends Document>(
   });
 }
 
-function createOne<T extends Document>(Mod: IMod<T>) {
+function createOne(Mod: ReturnModelType<any>) {
   return catchAsync(async (req, res) => {
-    const newDocument = Mod.build(req.body) as T;
+    const newDocument = Mod.build(req.body);
     await newDocument.save();
 
     res.status(201).send(newDocument);
   });
 }
 
-function updateOne<T extends Document>(Mod: IMod<T>) {
+function updateOne(Mod: ReturnModelType<any>) {
   return catchAsync(async (req, res) => {
     // you should have run the validators (express-validators), before passing
     // the req.body to
-    const updated = (await Mod.findByIdAndUpdate(req.params.id, req.body, {
+    const updated = await Mod.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
-    })) as T;
+    });
 
     if (!updated) {
       throw new NotFoundError('Document with this id is not found');
@@ -71,10 +67,10 @@ function updateOne<T extends Document>(Mod: IMod<T>) {
   });
 }
 
-function deleteOne<T extends Document>(Mod: IMod<T>) {
+function deleteOne(Mod: ReturnModelType<any>) {
   return catchAsync(async (req, res) => {
     const { id } = req.params;
-    const deletedDocument = (await Mod.findByIdAndDelete(id)) as T;
+    const deletedDocument = await Mod.findByIdAndDelete(id);
 
     if (!deletedDocument) {
       throw new NotFoundError('Document with this id is not found');

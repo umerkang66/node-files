@@ -7,7 +7,7 @@ type Role = 'user' | 'admin';
 const restrictTo = (...roles: Role[]): RequestHandler => {
   return (req, res, next) => {
     const role = req.currentUser!.role;
-    if (!roles.includes(role)) {
+    if (!roles.includes(role as Role)) {
       throw new NotAuthorizedError();
     }
 

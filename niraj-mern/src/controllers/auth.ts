@@ -1,7 +1,7 @@
 import { catchAsync } from '../utils/catch-async';
 import { User } from '../models/user';
 import { BadRequestError } from '../errors/bad-request-error';
-import { createSendToken } from '../services/create-send-token';
+import { createSendToken } from '../utils/create-send-token';
 import {
   sendAdminVerifyTokenMail,
   sendEmailVerificationMail,
@@ -13,6 +13,14 @@ import { ResetPasswordToken } from '../models/tokens/reset-password-token';
 import { type RequestHandler } from 'express';
 import { filterReqBody } from '../utils/filter-req-body';
 import { AdminVerifyToken } from '../models/tokens/admin-verify-token';
+import {
+  addAdminVerifyToken,
+  addEmailVerifyToken,
+  addResetPasswordToken,
+  checkAdminVerifyToken,
+  checkEmailVerifyToken,
+  checkResetPasswordToken,
+} from '../utils/token-utils';
 
 // express validator runs before it, so these values must be present
 const signup = catchAsync<{
@@ -32,7 +40,7 @@ const signup = catchAsync<{
   const user = User.build({ name, email, password });
   await user.save();
 
-  const token = await user.addEmailVerifyToken();
+  const token = await addEmailVerifyToken(user.id);
 
   await sendEmailVerificationMail(token, user.email);
 
@@ -59,7 +67,7 @@ const resendEmailVerifyToken = catchAsync<{ userId: string }>(
       );
     }
 
-    const token = await user.addEmailVerifyToken();
+    const token = await addEmailVerifyToken(user.id);
     await sendEmailVerificationMail(token, user.email);
 
     // This will not send the cookie but the normal response
@@ -81,7 +89,7 @@ const confirmSignup = catchAsync<{ userId: string; token: string }>(
       throw new BadRequestError('User is already verified');
     }
 
-    const foundToken = await user.checkEmailVerifyToken(token);
+    const foundToken = await checkEmailVerifyToken(user.id, token);
     if (!foundToken) {
       throw new NotFoundError('Invalid token');
     }
@@ -180,7 +188,7 @@ const forgotPassword = catchAsync<{ email: string }>(async (req, res) => {
   }
 
   // This token should be strong
-  const token = await user.addResetPasswordToken();
+  const token = await addResetPasswordToken(user.id);
 
   const host = req.get('host');
 
@@ -213,7 +221,7 @@ const resetPassword = catchAsync<
     throw new NotFoundError('User not found');
   }
 
-  const resetPasswordToken = await user.checkResetPasswordToken(token);
+  const resetPasswordToken = await checkResetPasswordToken(user.id, token);
 
   if (!resetPasswordToken) {
     throw new BadRequestError('Invalid token');
@@ -267,7 +275,7 @@ const adminSignup = catchAsync<{
 
   const user = await User.build({ name, email, password }).save();
 
-  const token = await user.addAdminVerifyToken();
+  const token = await addAdminVerifyToken(user.id);
 
   const host = req.get('host');
   const signupUrl = `${req.protocol}://${host}/api/auth/admin-signup/${user.id}?token=${token}`;
@@ -287,7 +295,7 @@ const confirmAdminSignup = catchAsync<
     throw new NotFoundError('User not found');
   }
 
-  const foundToken = await user.checkAdminVerifyToken(req.query.token);
+  const foundToken = await checkAdminVerifyToken(user.id, req.query.token);
   if (!foundToken) {
     throw new BadRequestError('Token is invalid');
   }

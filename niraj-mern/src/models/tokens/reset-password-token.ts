@@ -1,60 +1,47 @@
 import mongoose from 'mongoose';
+import {
+  Ref,
+  getModelForClass,
+  modelOptions,
+  pre,
+  prop,
+} from '@typegoose/typegoose';
+import { UserClass } from '../user';
 import { Password } from '../../services/password';
 
 interface ResetPasswordTokenAttrs {
-  owner: string | mongoose.ObjectId;
+  owner: string | mongoose.Types.ObjectId;
   token: string;
 }
 
-type ResetPasswordTokenDocument = mongoose.Document &
-  ResetPasswordTokenAttrs & { createdAt: string | number | Date };
-
-type BuildFn = (attrs: ResetPasswordTokenAttrs) => ResetPasswordTokenDocument;
-
-interface ResetPasswordTokenModel
-  extends mongoose.Model<ResetPasswordTokenDocument> {
-  build: BuildFn;
-}
-
-const resetPasswordTokenSchema = new mongoose.Schema({
-  owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    // This id belongs to this model 'User'
-    ref: 'User',
-    required: true,
-  },
-  token: {
-    type: String,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    // if type is date, it can have expires property
-    // now this document will expires after
-    expires: 3600, // in seconds -> 1 Hour
-    default: () => Date.now(), // we can also write it as 'Date.now' as func
-  },
-});
-
-resetPasswordTokenSchema.pre('save', async function (next) {
+@pre<ResetPasswordTokenClass>('save', async function () {
   if (this.isModified('token')) {
     // this doesn't use the bcrypt, because these tokens are not that important
     const hashedToken = Password.hashToken(this.token);
     this.set('token', hashedToken);
   }
-  next();
-});
+})
+@modelOptions({
+  // in seconds -> 1 Hour
+  schemaOptions: {
+    timestamps: true,
+    expires: 3600,
+    collection: 'resetPasswordTokens',
+  },
+})
+class ResetPasswordTokenClass {
+  @prop({ required: true })
+  token: string;
 
-resetPasswordTokenSchema.statics.build = function (
-  attrs: ResetPasswordTokenAttrs
-): ResetPasswordTokenDocument {
-  // after building this document in the model, it should be saved()
-  return new ResetPasswordToken(attrs);
-};
+  @prop({ required: true, ref: () => UserClass })
+  owner: Ref<UserClass>;
 
-const ResetPasswordToken = mongoose.model<
-  ResetPasswordTokenDocument,
-  ResetPasswordTokenModel
->('ResetPasswordToken', resetPasswordTokenSchema);
+  static build(attrs: ResetPasswordTokenAttrs) {
+    // after building this document in the model, it should be saved()
+    return new ResetPasswordToken(attrs);
+  }
+}
 
-export { ResetPasswordToken, type ResetPasswordTokenDocument };
+const ResetPasswordToken = getModelForClass(ResetPasswordTokenClass);
+
+export { ResetPasswordToken };
