@@ -70,11 +70,11 @@ class UserClass {
   @prop({ required: true, default: false })
   isVerified: boolean;
 
-  @prop({ default: 'user', enum: ['user', 'admin'] })
+  @prop({ required: true, default: 'user', enum: ['user', 'admin'] })
   role: string;
 
   @prop()
-  passwordChangedAt: Date;
+  passwordChangedAt?: Date;
 
   validatePassword(this: UserDocument, candidatePassword: string) {
     return Password.compare(candidatePassword, this.password);
