@@ -13,15 +13,6 @@ interface UserAttrs {
   email: string;
   password: string;
 }
-// This type will be returned to the frontend
-type UserSerialized = Omit<UserAttrs, 'password'> & {
-  id: string;
-  // these are actually 'dates'
-  createdAt: string | number | Date;
-  updatedAt: string | number | Date;
-  isVerified: boolean;
-  role: 'user' | 'admin';
-};
 
 @pre<UserClass>('save', async function (next) {
   if (!this.isModified('password') || this.isNew) {
@@ -108,4 +99,4 @@ const User = getModelForClass(UserClass);
 type UserDocument = DocumentType<UserClass>;
 
 // UserClass is exported because of the db references
-export { UserClass, User, type UserDocument, type UserSerialized };
+export { UserClass, User, type UserDocument };
