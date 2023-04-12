@@ -46,7 +46,7 @@ export function App() {
             if (err instanceof Array) {
               const customError = err as Errors;
               customError.forEach(err => {
-                const message = `${err.field ? `Field:${err.field} ` : ''}${
+                const message = `${err.field ? `Field:${err.field} -- ` : ''}${
                   err.message
                 }`;
                 toast.error(message);
