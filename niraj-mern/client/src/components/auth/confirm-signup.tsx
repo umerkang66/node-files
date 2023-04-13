@@ -174,7 +174,7 @@ const ConfirmSignup: FC = () => {
             link
             isLoading={resendEmailVerificationMutation.isLoading}
           >
-            <P underlined>Resend the token</P>
+            <P>Resend the token</P>
           </Button>
         </>
       ) : (

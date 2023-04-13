@@ -3,7 +3,7 @@ import type { FC, InputHTMLAttributes } from 'react';
 type Props = {
   name: string;
   label: string;
-  placeholder: string;
+  placeholder?: string;
 } & InputHTMLAttributes<HTMLInputElement>;
 
 const FormInput: FC<Props> = ({ name, label, placeholder, ...rest }) => {

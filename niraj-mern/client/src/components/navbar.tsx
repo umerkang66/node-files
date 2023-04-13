@@ -48,7 +48,9 @@ const Navbar: FC = () => {
               )}
               {!user.isLoading && user.data && user.data.currentUser && (
                 <div className="flex justify-center items-center">
-                  {user.data.currentUser.name}
+                  <CustomLink to="/auth/me">
+                    {user.data.currentUser.name}
+                  </CustomLink>
                   <button
                     onClick={signoutHandler}
                     className="ml-2 rounded bg-red-500 py-1 px-4 flex justify-center items-center"

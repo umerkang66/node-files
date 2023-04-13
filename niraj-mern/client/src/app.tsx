@@ -15,6 +15,7 @@ import { ForgotPassword } from './components/auth/forgot-password';
 import { Signin } from './components/auth/signin';
 import { Signup } from './components/auth/signup';
 import { RootLayout } from './components/layout/root-layout';
+// Pages
 import { ErrorPage } from './pages/error-page';
 import { Home } from './pages/home';
 // Contexts

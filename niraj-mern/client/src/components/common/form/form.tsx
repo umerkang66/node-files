@@ -1,8 +1,4 @@
-import type {
-  FC,
-  FormEventHandler,
-  PropsWithChildren,
-} from 'react';
+import type { FC, FormEventHandler, PropsWithChildren } from 'react';
 import { Container } from '../container';
 import { FormContainer } from './form-container';
 
@@ -12,9 +8,7 @@ const Form: FC<
     onSubmit?: () => void;
   }
 > = ({ children, className, onSubmit }) => {
-  const handleSubmit: FormEventHandler<
-    HTMLFormElement
-  > = e => {
+  const handleSubmit: FormEventHandler<HTMLFormElement> = e => {
     e.preventDefault();
     if (onSubmit) onSubmit();
   };
