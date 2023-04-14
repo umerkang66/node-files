@@ -23,7 +23,7 @@ function getAll(Mod: ReturnModelType<any>) {
 
 function getOne(
   Mod: ReturnModelType<any>,
-  populateOptions?: PopulateOptions[]
+  populateOptions?: PopulateOptions | PopulateOptions[]
 ) {
   return catchAsync(async (req, res) => {
     const { id } = req.params;
