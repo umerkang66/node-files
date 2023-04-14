@@ -1,13 +1,17 @@
-import { FC, PropsWithChildren } from 'react';
+import { FC, HTMLAttributes, PropsWithChildren } from 'react';
 
 const P: FC<
   PropsWithChildren & {
     className?: string;
-  }
-> = ({ children, className }) => {
+    remainDarkMode?: boolean;
+  } & HTMLAttributes<HTMLParagraphElement>
+> = ({ children, remainDarkMode, className, ...rest }) => {
   return (
     <p
-      className={`text-center dark:text-dark-subtle text-light-subtle ${className}`}
+      className={`text-center ${
+        remainDarkMode ? '' : 'dark:text-light-subtle '
+      }  text-dark-subtle ${className}`}
+      {...rest}
     >
       {children}
     </p>

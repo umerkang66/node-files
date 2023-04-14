@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { BsFillSunFill } from 'react-icons/bs';
 
 import { useThemeContext } from '../context/theme-provider';
@@ -8,11 +8,20 @@ import { useSignout } from '../hooks/auth/use-signout';
 import { Container } from './common/container';
 import { CustomLink } from './common/custom-link';
 import { Spinner } from './common/spinner';
+import { Button } from './common/button';
+import { Dropdown } from './common/dropdown';
+import { P } from './common/typography';
+
+const options = [
+  { name: 'Update me', link: '/auth/update-me' },
+  { name: 'Update Password', link: '/auth/update-password' },
+];
 
 const Navbar: FC = () => {
   const theme = useThemeContext();
   const user = useUser();
   const signoutMutation = useSignout();
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const signoutHandler = () => {
     signoutMutation.signout();
@@ -47,10 +56,16 @@ const Navbar: FC = () => {
                 <CustomLink to="/auth/signin">Sign in</CustomLink>
               )}
               {!user.isLoading && user.data && user.data.currentUser && (
-                <div className="flex justify-center items-center">
-                  <CustomLink to="/auth/me">
-                    {user.data.currentUser.name}
-                  </CustomLink>
+                <div className="flex justify-center items-center relative">
+                  <Button onClick={() => setShowDropdown(prev => !prev)} link>
+                    <P remainDarkMode>{user.data.currentUser.name}</P>
+                  </Button>
+                  {showDropdown && (
+                    <Dropdown
+                      close={() => setShowDropdown(false)}
+                      options={options}
+                    />
+                  )}
                   <button
                     onClick={signoutHandler}
                     className="ml-2 rounded bg-red-500 py-1 px-4 flex justify-center items-center"
