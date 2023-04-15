@@ -1,18 +1,21 @@
+import classNames from 'classnames';
 import { FC, HTMLAttributes, PropsWithChildren } from 'react';
 
 const P: FC<
   PropsWithChildren & {
     className?: string;
     remainDarkMode?: boolean;
+    center?: boolean;
   } & HTMLAttributes<HTMLParagraphElement>
-> = ({ children, remainDarkMode, className, ...rest }) => {
+> = ({ children, remainDarkMode, className, center, ...rest }) => {
+  const customClassNames = classNames(
+    `${center ? 'text-center' : ''} ${
+      remainDarkMode ? 'text-dark-subtle' : 'text-light-subtle '
+    }  dark:text-dark-subtle ${className}`
+  );
+
   return (
-    <p
-      className={`text-center ${
-        remainDarkMode ? '' : 'dark:text-light-subtle '
-      }  text-dark-subtle ${className}`}
-      {...rest}
-    >
+    <p className={customClassNames} {...rest}>
       {children}
     </p>
   );
@@ -21,11 +24,14 @@ const P: FC<
 const Heading: FC<
   PropsWithChildren & {
     className?: string;
+    remainDarkMode?: boolean;
   }
-> = ({ children, className }) => {
+> = ({ children, remainDarkMode, className }) => {
   return (
     <h1
-      className={`text-center dark:text-dark-subtle text-light-subtle font-bold text-2xl ${className}`}
+      className={`text-center ${
+        remainDarkMode ? 'text-dark-subtle' : 'text-light-subtle '
+      } dark:text-dark-subtle text-light-subtle font-bold text-2xl ${className}`}
     >
       {children}
     </h1>

@@ -8,6 +8,7 @@ export const Keys = {
   forgotPassword: '/api/auth/forgot-password',
   updateMe: '/api/auth/update-me',
   updatePassword: '/api/auth/update-password',
+  deleteMe: '/api/auth/delete-me',
   resetPassword: (token: string, userId: string) =>
     `/api/auth/reset-password?token=${token}&userId=${userId}`,
 };

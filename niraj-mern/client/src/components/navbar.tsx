@@ -14,7 +14,8 @@ import { P } from './common/typography';
 
 const options = [
   { name: 'Update me', link: '/auth/update-me' },
-  { name: 'Update Password', link: '/auth/update-password' },
+  { name: 'Update password', link: '/auth/update-password' },
+  { name: 'Delete me', link: '/auth/delete-me' },
 ];
 
 const Navbar: FC = () => {
@@ -53,7 +54,9 @@ const Navbar: FC = () => {
             </li>
             <li className="text-white font-semibold text-lg">
               {!user.isLoading && (!user.data || !user.data.currentUser) && (
-                <CustomLink to="/auth/signin">Sign in</CustomLink>
+                <CustomLink  to="/auth/signin">
+                  <P remainDarkMode>Sign in</P>
+                </CustomLink>
               )}
               {!user.isLoading && user.data && user.data.currentUser && (
                 <div className="flex justify-center items-center relative">

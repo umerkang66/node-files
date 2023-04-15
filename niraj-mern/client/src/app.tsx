@@ -14,6 +14,7 @@ import { ConfirmSignup } from './components/auth/confirm-signup';
 import { ForgotPassword } from './components/auth/forgot-password';
 import { Signin } from './components/auth/signin';
 import { Signup } from './components/auth/signup';
+import { DeleteMe } from './components/auth/delete-me';
 import { UpdateMe } from './components/auth/update-me';
 import { UpdatePassword } from './components/auth/update-password';
 import { RootLayout } from './components/layout/root-layout';
@@ -38,6 +39,7 @@ export function App() {
           <Route path="reset-password" element={<ResetPassword />} />
           <Route path="update-me" element={<UpdateMe />} />
           <Route path="update-password" element={<UpdatePassword />} />
+          <Route path="delete-me" element={<DeleteMe />} />
         </Route>
       </Route>
     )
