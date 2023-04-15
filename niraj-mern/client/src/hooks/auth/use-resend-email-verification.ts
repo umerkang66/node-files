@@ -3,11 +3,11 @@ import useSWRMutation from 'swr/mutation';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-import { catchErrors } from '../../utils/catch-errors';
+import { catchAxiosErrors } from '../../utils/catch-errors';
 import { Keys } from '../keys';
 import type { CurrentUser, Errors } from '../../types';
 
-const resendEmailVerificationFn = catchErrors(
+const resendEmailVerificationFn = catchAxiosErrors(
   async (url: string, { arg }: { arg: any }) => {
     const res = await axios.post(url, arg);
     return res.data as CurrentUser;

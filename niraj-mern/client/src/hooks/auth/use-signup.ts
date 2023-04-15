@@ -5,19 +5,21 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 import type { Errors } from '../../types';
-import { catchErrors } from '../../utils/catch-errors';
+import { catchAxiosErrors } from '../../utils/catch-errors';
 import { Keys } from '../keys';
 
-const signupFn = catchErrors(async (url: string, { arg }: { arg: any }) => {
-  type SignupReturnType = {
-    userId: string;
-    message: string;
-    isVerified: false;
-  };
+const signupFn = catchAxiosErrors(
+  async (url: string, { arg }: { arg: any }) => {
+    type SignupReturnType = {
+      userId: string;
+      message: string;
+      isVerified: false;
+    };
 
-  const res = await axios.post(url, arg);
-  return res.data as SignupReturnType;
-});
+    const res = await axios.post(url, arg);
+    return res.data as SignupReturnType;
+  }
+);
 
 function useSignup() {
   const { trigger, data, error, isMutating } = useSWRMutation(

@@ -2,10 +2,10 @@ import axios from 'axios';
 import useSWR from 'swr';
 
 import { CurrentUser, Errors } from '../../types';
-import { catchErrors } from '../../utils/catch-errors';
+import { catchAxiosErrors } from '../../utils/catch-errors';
 import { Keys } from '../keys';
 
-const fetchUser = catchErrors(async (url: string) => {
+const fetchUser = catchAxiosErrors(async (url: string) => {
   const res = await axios.get(url);
   return res.data as { currentUser: CurrentUser };
 });

@@ -14,6 +14,8 @@ import { ConfirmSignup } from './components/auth/confirm-signup';
 import { ForgotPassword } from './components/auth/forgot-password';
 import { Signin } from './components/auth/signin';
 import { Signup } from './components/auth/signup';
+import { UpdateMe } from './components/auth/update-me';
+import { UpdatePassword } from './components/auth/update-password';
 import { RootLayout } from './components/layout/root-layout';
 // Pages
 import { ErrorPage } from './pages/error-page';
@@ -34,6 +36,8 @@ export function App() {
           <Route path="confirm-signup" element={<ConfirmSignup />} />
           <Route path="forget-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="update-me" element={<UpdateMe />} />
+          <Route path="update-password" element={<UpdatePassword />} />
         </Route>
       </Route>
     )

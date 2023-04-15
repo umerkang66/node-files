@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 
-const catchErrors = <
+const catchAxiosErrors = <
   T extends (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>>
 >(
   fn: T
@@ -20,4 +20,4 @@ const catchErrors = <
   return fetcherFunction as T;
 };
 
-export { catchErrors };
+export { catchAxiosErrors };

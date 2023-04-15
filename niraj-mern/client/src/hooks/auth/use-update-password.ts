@@ -1,37 +1,46 @@
 import { useCallback, useEffect } from 'react';
-import useSWRMutation from 'swr/mutation';
 import axios from 'axios';
+import { mutate } from 'swr';
+import useSWRMutation from 'swr/mutation';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
-import { Keys } from '../keys';
 import { CurrentUser, Errors } from '../../types';
 import { catchAxiosErrors } from '../../utils/catch-errors';
-import { mutate } from 'swr';
+import { Keys } from '../keys';
 
-const resetPasswordFn = catchAxiosErrors(
-  async (
-    url: string,
-    { arg }: { arg: { password: string; passwordConfirm: string } }
-  ) => {
-    const res = await axios.patch(url, arg);
-    return res.data as
+type Body = {
+  currentPassword: string;
+  password: string;
+  passwordConfirm: string;
+};
+
+const updatePasswordFn = catchAxiosErrors(
+  async (url: string, { arg }: { arg: Body }) => {
+    type UpdatePasswordReturnType =
       | CurrentUser
-      | { isVerified: false; message: string; userId: string };
+      | {
+          message: string;
+          userId: string;
+          isVerified: false;
+        };
+
+    const res = await axios.patch(url, arg);
+    return res.data as UpdatePasswordReturnType;
   }
 );
 
-function useResetPassword(token: string, userId: string) {
+function useUpdatePassword() {
   const { trigger, data, error, isMutating } = useSWRMutation(
-    Keys.resetPassword(token, userId),
-    resetPasswordFn
+    Keys.updatePassword,
+    updatePasswordFn
   );
   const navigate = useNavigate();
 
-  type Body = { password: string; passwordConfirm: string };
-  const resetPassword = useCallback(
+  const updatePassword = useCallback(
     async (body: Body) => {
       await trigger(body);
+      // This will returns a promise
       return mutate(Keys.currentUser);
     },
     [trigger]
@@ -40,6 +49,7 @@ function useResetPassword(token: string, userId: string) {
   useEffect(() => {
     // error is handled globally
     if (data) {
+      // btw, we are checking for the non-verified accounts just as a precautionary measure, because this component will not be show
       if (data.isVerified === false) {
         toast.warn('You are not verified, please verify your account');
         navigate('/auth/confirm-signup', {
@@ -48,23 +58,18 @@ function useResetPassword(token: string, userId: string) {
           replace: true,
         });
       } else {
-        toast.success('You have successfully reset the password');
+        toast.success('You have successfully update your password');
         navigate('/');
       }
     }
-    // navigate will not create a problem, because this component
-    // and hooks will unmount, when the path changes,
-    // problem will occur in navbar hooks, because that will
-    // not be unmount, because navbar stays forever
-    // here we have to memoize the navigate
   }, [data, navigate]);
 
   return {
-    resetPassword,
+    updatePassword,
     data,
     error: error as Errors | null,
     isLoading: isMutating,
   };
 }
 
-export { useResetPassword };
+export { useUpdatePassword };

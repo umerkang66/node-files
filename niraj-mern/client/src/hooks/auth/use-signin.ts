@@ -6,21 +6,23 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 import { CurrentUser, Errors } from '../../types';
-import { catchErrors } from '../../utils/catch-errors';
+import { catchAxiosErrors } from '../../utils/catch-errors';
 import { Keys } from '../keys';
 
-const signinFn = catchErrors(async (url: string, { arg }: { arg: any }) => {
-  type SigninReturnType =
-    | CurrentUser
-    | {
-        message: string;
-        userId: string;
-        isVerified: false;
-      };
+const signinFn = catchAxiosErrors(
+  async (url: string, { arg }: { arg: any }) => {
+    type SigninReturnType =
+      | CurrentUser
+      | {
+          message: string;
+          userId: string;
+          isVerified: false;
+        };
 
-  const res = await axios.post(url, arg);
-  return res.data as SigninReturnType;
-});
+    const res = await axios.post(url, arg);
+    return res.data as SigninReturnType;
+  }
+);
 
 function useSignin() {
   const { trigger, data, error, isMutating } = useSWRMutation(

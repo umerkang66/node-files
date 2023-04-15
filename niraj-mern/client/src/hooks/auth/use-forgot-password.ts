@@ -5,9 +5,9 @@ import { toast } from 'react-toastify';
 
 import { Keys } from '../keys';
 import { Errors } from '../../types';
-import { catchErrors } from '../../utils/catch-errors';
+import { catchAxiosErrors } from '../../utils/catch-errors';
 
-const forgotPasswordFn = catchErrors(
+const forgotPasswordFn = catchAxiosErrors(
   async (url: string, { arg }: { arg: { email: string } }) => {
     const res = await axios.post(url, arg);
     return res.data as { userId: string; message: string };

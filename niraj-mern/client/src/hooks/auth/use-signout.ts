@@ -7,9 +7,9 @@ import { useNavigate } from 'react-router-dom';
 
 import { Keys } from '../keys';
 import { Errors } from '../../types';
-import { catchErrors } from '../../utils/catch-errors';
+import { catchAxiosErrors } from '../../utils/catch-errors';
 
-const signoutFn = catchErrors(async (url: string) => {
+const signoutFn = catchAxiosErrors(async (url: string) => {
   const res = await axios.post(url);
   return res.data as { message: string };
 });
