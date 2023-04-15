@@ -11,7 +11,7 @@ import { Keys } from '../keys';
 
 const deleteMeFn = catchAxiosErrors(async (url: string) => {
   const res = await axios.delete(url);
-  return res.data as null;
+  return res.data as '';
 });
 
 function useDeleteMe() {
@@ -27,12 +27,10 @@ function useDeleteMe() {
     return mutate(Keys.currentUser);
   }, [trigger]);
 
-  console.log(data);
-
   useEffect(() => {
     // error is handled globally
-    if (data === null) {
-      // 'null' is when user is successfully deleted
+    if (data === '') {
+      // '' is when user is successfully deleted
       toast.success('Your account is successfully deleted');
       navigate('/');
     }
