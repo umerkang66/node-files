@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import useSWRMutation from 'swr/mutation';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -22,11 +22,29 @@ const resetPasswordFn = catchAxiosErrors(
 );
 
 function useResetPassword(token: string, userId: string) {
+  const navigate = useNavigate();
+
   const { trigger, data, error, isMutating } = useSWRMutation(
     Keys.resetPassword(token, userId),
-    resetPasswordFn
+    resetPasswordFn,
+    {
+      onSuccess(data, key, config) {
+        if (data) {
+          if (data.isVerified === false) {
+            toast.warn('You are not verified, please verify your account');
+            navigate('/auth/confirm-signup', {
+              state: { userId: data.userId },
+              // delete the current page from back history
+              replace: true,
+            });
+          } else {
+            toast.success('You have successfully reset the password');
+            navigate('/');
+          }
+        }
+      },
+    }
   );
-  const navigate = useNavigate();
 
   type Body = { password: string; passwordConfirm: string };
   const resetPassword = useCallback(
@@ -36,28 +54,6 @@ function useResetPassword(token: string, userId: string) {
     },
     [trigger]
   );
-
-  useEffect(() => {
-    // error is handled globally
-    if (data) {
-      if (data.isVerified === false) {
-        toast.warn('You are not verified, please verify your account');
-        navigate('/auth/confirm-signup', {
-          state: { userId: data.userId },
-          // delete the current page from back history
-          replace: true,
-        });
-      } else {
-        toast.success('You have successfully reset the password');
-        navigate('/');
-      }
-    }
-    // navigate will not create a problem, because this component
-    // and hooks will unmount, when the path changes,
-    // problem will occur in navbar hooks, because that will
-    // not be unmount, because navbar stays forever
-    // here we have to memoize the navigate
-  }, [data, navigate]);
 
   return {
     resetPassword,

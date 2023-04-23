@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import useSWRMutation from 'swr/mutation';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -17,7 +17,12 @@ const resendEmailVerificationFn = catchAxiosErrors(
 function useResendEmailVerification() {
   const { trigger, data, error, isMutating } = useSWRMutation(
     Keys.resendEmailVerification,
-    resendEmailVerificationFn
+    resendEmailVerificationFn,
+    {
+      onSuccess(data, key, config) {
+        if (data) toast.success('Email verification token is sent');
+      },
+    }
   );
 
   type Body = { userId: string };
@@ -26,13 +31,6 @@ function useResendEmailVerification() {
     (body: Body) => trigger(body),
     [trigger]
   );
-
-  useEffect(() => {
-    // error is handled globally
-    if (data) {
-      toast.success('Email verification token is sent');
-    }
-  }, [data]);
 
   return {
     resendEmailVerification,

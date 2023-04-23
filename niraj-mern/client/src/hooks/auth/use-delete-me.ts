@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import axios from 'axios';
 import useSWRMutation from 'swr/mutation';
 import { mutate } from 'swr';
@@ -15,26 +15,27 @@ const deleteMeFn = catchAxiosErrors(async (url: string) => {
 });
 
 function useDeleteMe() {
+  const navigate = useNavigate();
+
   const { trigger, data, error, isMutating } = useSWRMutation(
     Keys.deleteMe,
-    deleteMeFn
+    deleteMeFn,
+    {
+      onSuccess(data, key, config) {
+        if (data === '') {
+          // '' is when user is successfully deleted
+          toast.success('Your account is successfully deleted');
+          navigate('/');
+        }
+      },
+    }
   );
-  const navigate = useNavigate();
 
   const deleteMe = useCallback(async () => {
     await trigger();
     // This will returns a promise
     return mutate(Keys.currentUser);
   }, [trigger]);
-
-  useEffect(() => {
-    // error is handled globally
-    if (data === '') {
-      // '' is when user is successfully deleted
-      toast.success('Your account is successfully deleted');
-      navigate('/');
-    }
-  }, [data, navigate]);
 
   return {
     deleteMe,

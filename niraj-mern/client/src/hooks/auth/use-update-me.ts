@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import axios from 'axios';
 import useSWRMutation from 'swr/mutation';
 import { mutate } from 'swr';
@@ -19,11 +19,20 @@ const updateMeFn = catchAxiosErrors(
 );
 
 function useUpdateMe() {
+  const navigate = useNavigate();
+
   const { trigger, data, error, isMutating } = useSWRMutation(
     Keys.updateMe,
-    updateMeFn
+    updateMeFn,
+    {
+      onSuccess(data, key, config) {
+        if (data) {
+          toast.success('You have successfully update your info');
+          navigate('/');
+        }
+      },
+    }
   );
-  const navigate = useNavigate();
 
   const updateMe = useCallback(
     async (body: { name: string }) => {
@@ -33,14 +42,6 @@ function useUpdateMe() {
     },
     [trigger]
   );
-
-  useEffect(() => {
-    // error is handled globally
-    if (data) {
-      toast.success('You have successfully update your info');
-      navigate('/');
-    }
-  }, [data, navigate]);
 
   return {
     updateMe,

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import useSWRMutation from 'swr/mutation';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -22,11 +22,24 @@ const signupFn = catchAxiosErrors(
 );
 
 function useSignup() {
+  const navigate = useNavigate();
+
   const { trigger, data, error, isMutating } = useSWRMutation(
     Keys.signup,
-    signupFn
+    signupFn,
+    {
+      onSuccess(data, key, config) {
+        if (data) {
+          toast.success(data.message);
+          navigate('/auth/confirm-signup', {
+            state: { userId: data.userId },
+            // delete the current page from back history
+            replace: true,
+          });
+        }
+      },
+    }
   );
-  const navigate = useNavigate();
 
   type Body = {
     name: string;
@@ -36,22 +49,6 @@ function useSignup() {
   };
 
   const signup = useCallback((body: Body) => trigger(body), [trigger]);
-
-  useEffect(() => {
-    // error is handled globally
-    if (data) {
-      toast.success(data.message);
-      navigate('/auth/confirm-signup', {
-        state: { userId: data.userId },
-        // delete the current page from back history
-        replace: true,
-      });
-    }
-    // navigate will not create a problem, because this component
-    // and hooks will unmount, when the path changes,
-    // problem will occur in navbar hooks, because that will
-    // not be unmount, because navbar stays forever
-  }, [navigate, data]);
 
   return {
     signup,

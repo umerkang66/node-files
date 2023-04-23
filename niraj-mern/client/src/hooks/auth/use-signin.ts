@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import axios from 'axios';
 import useSWRMutation from 'swr/mutation';
 import { mutate } from 'swr';
@@ -25,11 +25,29 @@ const signinFn = catchAxiosErrors(
 );
 
 function useSignin() {
+  const navigate = useNavigate();
+
   const { trigger, data, error, isMutating } = useSWRMutation(
     Keys.signin,
-    signinFn
+    signinFn,
+    {
+      onSuccess(data, key, config) {
+        if (data) {
+          if (data.isVerified === false) {
+            toast.warn('You are not verified, please verify your account');
+            navigate('/auth/confirm-signup', {
+              state: { userId: data.userId },
+              // delete the current page from back history
+              replace: true,
+            });
+          } else {
+            toast.success('You are successfully logged in');
+            navigate('/');
+          }
+        }
+      },
+    }
   );
-  const navigate = useNavigate();
 
   const signin = useCallback(
     async (body: { email: string; password: string }) => {
@@ -39,23 +57,6 @@ function useSignin() {
     },
     [trigger]
   );
-
-  useEffect(() => {
-    // error is handled globally
-    if (data) {
-      if (data.isVerified === false) {
-        toast.warn('You are not verified, please verify your account');
-        navigate('/auth/confirm-signup', {
-          state: { userId: data.userId },
-          // delete the current page from back history
-          replace: true,
-        });
-      } else {
-        toast.success('You are successfully logged in');
-        navigate('/');
-      }
-    }
-  }, [data, navigate]);
 
   return {
     signin,

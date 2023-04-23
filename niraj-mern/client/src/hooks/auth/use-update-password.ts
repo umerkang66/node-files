@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import axios from 'axios';
 import { mutate } from 'swr';
 import useSWRMutation from 'swr/mutation';
@@ -31,11 +31,30 @@ const updatePasswordFn = catchAxiosErrors(
 );
 
 function useUpdatePassword() {
+  const navigate = useNavigate();
+
   const { trigger, data, error, isMutating } = useSWRMutation(
     Keys.updatePassword,
-    updatePasswordFn
+    updatePasswordFn,
+    {
+      onSuccess(data, key, config) {
+        if (data) {
+          // btw, we are checking for the non-verified accounts just as a precautionary measure, because this component will not be show
+          if (data.isVerified === false) {
+            toast.warn('You are not verified, please verify your account');
+            navigate('/auth/confirm-signup', {
+              state: { userId: data.userId },
+              // delete the current page from back history
+              replace: true,
+            });
+          } else {
+            toast.success('You have successfully update your password');
+            navigate('/');
+          }
+        }
+      },
+    }
   );
-  const navigate = useNavigate();
 
   const updatePassword = useCallback(
     async (body: Body) => {
@@ -45,24 +64,6 @@ function useUpdatePassword() {
     },
     [trigger]
   );
-
-  useEffect(() => {
-    // error is handled globally
-    if (data) {
-      // btw, we are checking for the non-verified accounts just as a precautionary measure, because this component will not be show
-      if (data.isVerified === false) {
-        toast.warn('You are not verified, please verify your account');
-        navigate('/auth/confirm-signup', {
-          state: { userId: data.userId },
-          // delete the current page from back history
-          replace: true,
-        });
-      } else {
-        toast.success('You have successfully update your password');
-        navigate('/');
-      }
-    }
-  }, [data, navigate]);
 
   return {
     updatePassword,

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import useSWRMutation from 'swr/mutation';
 import { mutate } from 'swr';
 import axios from 'axios';
@@ -18,7 +18,12 @@ const confirmSignupFn = catchAxiosErrors(
 function useConfirmSignup() {
   const { trigger, data, error, isMutating } = useSWRMutation(
     Keys.confirmSignup,
-    confirmSignupFn
+    confirmSignupFn,
+    {
+      onSuccess(data, key, config) {
+        if (data) toast.success('You account is successfully verified');
+      },
+    }
   );
 
   type Body = { token: string; userId: string };
@@ -30,13 +35,6 @@ function useConfirmSignup() {
     },
     [trigger]
   );
-
-  useEffect(() => {
-    // error is handled globally
-    if (data) {
-      toast.success('You account is successfully verified');
-    }
-  }, [data]);
 
   return {
     confirmSignup,

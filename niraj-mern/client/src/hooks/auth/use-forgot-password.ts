@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import useSWRMutation from 'swr/mutation';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -17,24 +17,17 @@ const forgotPasswordFn = catchAxiosErrors(
 function useForgotPassword() {
   const { trigger, data, error, isMutating } = useSWRMutation(
     Keys.forgotPassword,
-    forgotPasswordFn
+    forgotPasswordFn,
+    {
+      onSuccess(data, key, config) {
+        // see the use signup hook, to know how to share state between routes
+        if (data) toast.success(data.message);
+      },
+    }
   );
 
   type Body = { email: string };
   const forgotPassword = useCallback((body: Body) => trigger(body), [trigger]);
-
-  useEffect(() => {
-    // error is handled globally
-    if (data) {
-      // see the use signup hook, to know how to share state between routes
-      toast.success(data.message);
-    }
-    // navigate will not create a problem, because this component
-    // and hooks will unmount, when the path changes,
-    // problem will occur in navbar hooks, because that will
-    // not be unmount, because navbar stays forever
-    // here we have to memoize the navigate
-  }, [data]);
 
   return {
     forgotPassword,
