@@ -135,7 +135,7 @@ const ConfirmSignup: FC = () => {
     <Form onSubmit={onSubmitHandler}>
       {state && state.userId ? (
         <>
-          <div>
+          <div className="text-center">
             <Title>Please enter the 8 digits OTP to verify your account</Title>
             <P>OTP has been sent to your email</P>
             <P>You can also PASTE the OTP</P>
