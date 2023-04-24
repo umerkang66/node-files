@@ -26,7 +26,7 @@ function useUpdateMe() {
 
   const updateMe = useCallback(
     async (body: { name: string }) => {
-      // This will returns a promise
+      // This will returns a promise.
       await trigger(body);
       return mutate(Keys.currentUser);
     },
