@@ -16,6 +16,10 @@ app.use('/api/auth', authRouter);
 // These routes are all controlled by admin
 app.use('/api/admin/users', adminUsersRouter);
 
+app.use('/api/*', (req, res, next) => {
+  next(new NotFoundError(`The api route '${req.baseUrl}' is not available`));
+});
+
 if (process.env.NODE_ENV === 'production') {
   // FIRSTLY the express will check if the request for any static file has come, then it will serve static files, SECONDLY it will check about the routes for react router, then it will serve the index.html file that again will send the recommended static files
 
@@ -28,10 +32,6 @@ if (process.env.NODE_ENV === 'production') {
     res.sendFile(path.join(staticPath, 'index.html'));
   });
 }
-
-app.use('*', (req, res, next) => {
-  next(new NotFoundError(`The api route '${req.baseUrl}' is not available`));
-});
 
 // Error Handler
 app.use(errorHandler);
