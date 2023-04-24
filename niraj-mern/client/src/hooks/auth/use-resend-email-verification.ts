@@ -18,11 +18,7 @@ function useResendEmailVerification() {
   const { trigger, data, error, isMutating } = useSWRMutation(
     Keys.resendEmailVerification,
     resendEmailVerificationFn,
-    {
-      onSuccess(data, key, config) {
-        if (data) toast.success('Email verification token is sent');
-      },
-    }
+    { onSuccess: () => toast.success('Email verification token is sent') }
   );
 
   type Body = { userId: string };

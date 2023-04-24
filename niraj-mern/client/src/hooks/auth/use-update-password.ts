@@ -39,7 +39,7 @@ function useUpdatePassword() {
     {
       onSuccess(data, key, config) {
         if (data) {
-          // btw, we are checking for the non-verified accounts just as a precautionary measure, because this component will not be show
+          // NOTE: btw, we are checking for the non-verified accounts just as a precautionary measure, because this component will not be show
           if (data.isVerified === false) {
             toast.warn('You are not verified, please verify your account');
             navigate('/auth/confirm-signup', {
@@ -49,7 +49,6 @@ function useUpdatePassword() {
             });
           } else {
             toast.success('You have successfully update your password');
-            navigate('/');
           }
         }
       },

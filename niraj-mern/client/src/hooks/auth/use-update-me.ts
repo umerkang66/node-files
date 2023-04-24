@@ -3,7 +3,6 @@ import axios from 'axios';
 import useSWRMutation from 'swr/mutation';
 import { mutate } from 'swr';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
 
 import { CurrentUser, Errors } from '../../types';
 import { catchAxiosErrors } from '../../utils/catch-errors';
@@ -19,19 +18,10 @@ const updateMeFn = catchAxiosErrors(
 );
 
 function useUpdateMe() {
-  const navigate = useNavigate();
-
   const { trigger, data, error, isMutating } = useSWRMutation(
     Keys.updateMe,
     updateMeFn,
-    {
-      onSuccess(data, key, config) {
-        if (data) {
-          toast.success('You have successfully update your info');
-          navigate('/');
-        }
-      },
-    }
+    { onSuccess: () => toast.success('You have successfully update your info') }
   );
 
   const updateMe = useCallback(

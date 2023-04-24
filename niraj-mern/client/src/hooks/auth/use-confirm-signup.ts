@@ -19,11 +19,7 @@ function useConfirmSignup() {
   const { trigger, data, error, isMutating } = useSWRMutation(
     Keys.confirmSignup,
     confirmSignupFn,
-    {
-      onSuccess(data, key, config) {
-        if (data) toast.success('You account is successfully verified');
-      },
-    }
+    { onSuccess: () => toast.success('You account is successfully verified') }
   );
 
   type Body = { token: string; userId: string };
