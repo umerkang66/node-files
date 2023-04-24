@@ -9,8 +9,10 @@ import { CurrentUser, Errors } from '../../types';
 import { catchAxiosErrors } from '../../utils/catch-errors';
 import { Keys } from '../keys';
 
+type Body = { email: string; password: string };
+
 const signinFn = catchAxiosErrors(
-  async (url: string, { arg }: { arg: any }) => {
+  async (url: string, { arg }: { arg: Body }) => {
     type SigninReturnType =
       | CurrentUser
       | {
@@ -50,7 +52,7 @@ function useSignin() {
   );
 
   const signin = useCallback(
-    async (body: { email: string; password: string }) => {
+    async (body: Body) => {
       await trigger(body);
       // This will returns a promise
       return mutate(Keys.currentUser);
