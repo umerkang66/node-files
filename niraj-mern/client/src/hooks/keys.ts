@@ -1,5 +1,8 @@
 export const Keys = {
   signup: '/api/auth/signup',
+  adminSignup: '/api/auth/admin-signup',
+  confirmAdminSignup: (userId: string, token: string) =>
+    `/api/auth/admin-signup/${userId}?token=${token}`,
   confirmSignup: '/api/auth/confirm-signup',
   signin: '/api/auth/signin',
   currentUser: '/api/auth/currentuser',

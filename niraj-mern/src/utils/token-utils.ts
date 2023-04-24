@@ -7,8 +7,7 @@ import { ResetPasswordToken } from '../models/tokens/reset-password-token';
 type UserId = string | mongoose.Types.ObjectId;
 // AdminVerityToken
 export async function addAdminVerifyToken(userId: UserId) {
-  // this will create a 8 digit token
-  const token = Password.createToken(4);
+  const token = Password.createToken();
 
   await AdminVerifyToken.build({ owner: userId, token }).save();
 

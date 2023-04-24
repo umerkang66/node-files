@@ -278,7 +278,7 @@ const adminSignup = catchAsync<{
   const token = await addAdminVerifyToken(user.id);
 
   const host = req.get('host');
-  const signupUrl = `${req.protocol}://${host}/api/auth/admin-signup/${user.id}?token=${token}`;
+  const signupUrl = `${req.protocol}://${host}/auth/admin-signup/${user.id}?token=${token}`;
 
   await sendAdminVerifyTokenMail(signupUrl, 'ugulzar4512@gmail.com');
 

@@ -15,6 +15,8 @@ import { ForgotPassword } from './components/auth/forgot-password';
 import { Signin } from './components/auth/signin';
 import { Signup } from './components/auth/signup';
 import { DeleteMe } from './components/auth/delete-me';
+import { AdminSignup } from './components/auth/admin-signup';
+import { ConfirmAdminSignup } from './components/auth/confirm-admin-signup';
 import { UpdateMe } from './components/auth/update-me';
 import { UpdatePassword } from './components/auth/update-password';
 import { RootLayout } from './components/layout/root-layout';
@@ -40,6 +42,8 @@ export function App() {
           <Route path="update-me" element={<UpdateMe />} />
           <Route path="update-password" element={<UpdatePassword />} />
           <Route path="delete-me" element={<DeleteMe />} />
+          <Route path="admin-signup" element={<AdminSignup />} />
+          <Route path="admin-signup/:userId" element={<ConfirmAdminSignup />} />
         </Route>
       </Route>
     )
