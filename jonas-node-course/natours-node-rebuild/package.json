@@ -1,0 +1,55 @@
+{
+  "name": "natours-node-rebuild",
+  "version": "1.0.0",
+  "description": "Learning node, express and mongodb",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:dev": "nodemon server.js",
+    "start:prod": "NODE_ENV=production nodemon server.js",
+    "watch:js": "esbuild ./public/js/index.js --bundle --minify --watch --sourcemap --outfile=./public/js/bundle.js",
+    "build:js": "esbuild ./public/js/index.js --bundle --minify --sourcemap --outfile=./public/js/bundle.js"
+  },
+  "author": "Umer Kang",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.26.0",
+    "bcryptjs": "^2.4.3",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^6.2.1",
+    "hpp": "^0.2.3",
+    "html-to-text": "^8.1.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.2.1",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.4",
+    "nodemailer": "^6.7.2",
+    "pug": "^3.0.2",
+    "sharp": "^0.30.1",
+    "slugify": "^1.6.5",
+    "stripe": "^7.0.0",
+    "validator": "^13.7.0",
+    "xss-clean": "^0.1.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.6",
+    "eslint": "^8.8.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.28.0",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.5.1"
+  },
+  "engines": {
+    "node": "^18"
+  }
+}

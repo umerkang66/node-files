@@ -1,0 +1,14 @@
+{
+  "name": "improving-node-performance",
+  "version": "1.0.0",
+  "description": "Learning about improving node performance by clustering, and worker threads from stephen grider advanced node course",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "author": "Umer Kang",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.3"
+  }
+}

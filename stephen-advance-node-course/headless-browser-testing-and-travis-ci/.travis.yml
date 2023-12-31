@@ -1,0 +1,38 @@
+# Tell what language are we using
+language: node_js
+# which version of node js
+node_js:
+  - '16'
+# which operating system should be in the virtual machine
+# trusty is a small version of linux distribution, which is well tailored for running code
+dist: trusty
+# our code depends on these two services
+services:
+  - mongodb
+  - redis-server
+# set up the environment variables for our project, some envs are here and some envs are in the ci.js file
+env:
+  # this can't be done on dev mode because there is also cra server running on port 3000
+  - NODE_ENV=ci PORT=3000
+  # IMPORTANT! Adding in two records causes two separate builds to be created, where one build has the NODE_ENV set, and the other has PORT set.
+# node_modules will not be in github
+# so after travis installing the node_modules first time it should cache it
+cache:
+  directories:
+    - node_modules
+    - client/node_modules
+# list of couple of commands that we want to be executed at the command line
+install:
+  # npm install will run and take a look at the package.json file and tries to install all of them, if package is already installed in the cached node_modules, it will not install it
+  - npm install
+  # this will also install the client dependencies. checkout out the package.json file
+  - npm run build
+script:
+  # tell some scripts that will be executed at the command line
+  # "&" means take this command and run the sub_shell (in the background), process will be killed when the shell is terminated, that where next nohup comes in
+  # "nohup" means that if the shell (command line) is terminated don't terminate the start process, sometimes travis kill the terminals
+  - nohup npm run start &
+  # just sit around and wait for 3 seconds, before start any tests
+  # sleep 3 is just a linux command, linux shell will pause for 3 seconds
+  - sleep 3
+  - npm run test

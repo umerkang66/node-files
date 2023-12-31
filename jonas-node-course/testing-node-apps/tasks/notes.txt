@@ -1,0 +1,1 @@
+cp fake_config config

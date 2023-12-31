@@ -1,0 +1,21 @@
+Streams: Used to process (read and write) data piece (chunks), without completing the whole read or write operation, and therefore without keeping all the data in memory
+
+In Node: There are 4 fundamentals types of streams:
+1)   READABLE STREAMS
+2)   WRITABLE STREAMS
+3)   DUPLEX STREAMS
+4)   TRANSFORM STREAMS
+
+READABLE STREAMS: Streams from which we can read (consume data) e.g. when http server get request, or we can read the file piece by piece, using hte read stream by fs module. There are two events that we can react to one is "data", and other is "end"
+Data event is emitted when the new piece of data is consumed and the End event is emitted as their is no more data to consume
+There are two functions in readable streams, that are pipe() and read()
+pipe() function allows to plug streams together
+
+WRITABLE STREAMS: where we can write streams, e.g http response
+The most important events are "drain" and "finish" events and the most important functions are write() and end() functions
+
+DUPLEX STREAMS: streams that are both readable and writable streams, e.g. websocket
+
+TRANSFORM STREAMS: duplex streams that transform data as it is written or read, e.g. zlib Gzip creation
+
+These functions that are mentioned in this notes, are the ones for consuming streams, streams that are already written

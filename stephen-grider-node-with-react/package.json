@@ -1,0 +1,36 @@
+{
+  "name": "emaily-server",
+  "version": "1.0.0",
+  "description": "Project from node with react stephen grider course",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "server": "nodemon index.js",
+    "client": "npm run start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "npm install && npm install --prefix client && npm run build --prefix client"
+  },
+  "author": "Umer Kang",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^7.0.0",
+    "cookie-session": "^2.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "html-to-text": "^8.1.0",
+    "lodash": "^4.17.21",
+    "mongoose": "^6.2.4",
+    "nodemailer": "^6.9.4",
+    "passport": "^0.5.2",
+    "passport-google-oauth20": "^2.0.0",
+    "path-parser": "^6.1.0",
+    "redux-thunk": "^2.4.1",
+    "stripe": "^8.208.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "engines": {
+    "node": "^16.19.0"
+  }
+}
